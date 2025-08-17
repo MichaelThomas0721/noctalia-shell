@@ -84,6 +84,15 @@ ColumnLayout {
                        Settings.data.bar.showTray = checked
                      }
         }
+
+        NToggle {
+          label: "Transparent Background"
+          description: "Make the bar's background transparent"
+          checked: Settings.data.bar.transparentBackground
+          onToggled: checked => {
+                       Settings.data.bar.transparentBackground = checked
+                     }
+        }
       }
     }
   }

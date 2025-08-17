@@ -39,7 +39,7 @@ Variants {
         id: bar
 
         anchors.fill: parent
-        color: Color.mSurface
+        color: Settings.data.bar.transparentBackground ? "#66" + (Color.mSurface + "").substring(1) : Color.mSurface
         layer.enabled: true
       }
 
