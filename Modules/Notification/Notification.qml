@@ -96,7 +96,7 @@ Variants {
             height: Math.max(80 * scaling, contentRow.implicitHeight + (Style.marginL * 2 * scaling))
             clip: true
             radius: Style.radiusL * scaling
-            border.color: Color.applyOpacity(Color.mOutline, "33")
+            border.color: Color.mOutline
             border.width: Math.max(1, Style.borderS * scaling)
             color: Color.mSurface
 
@@ -200,11 +200,13 @@ Variants {
                     Layout.alignment: Qt.AlignTop
                     // Start avatar aligned with body (below the summary)
                     anchors.topMargin: textContent.childrenRect.y
-                    imagePath: Icons.iconFromName(model.appIcon, "application-x-executable")
+                    // Prefer notification-provided image (e.g., user avatar) then fall back to app icon
+                    imagePath: (model.image && model.image !== "") ? model.image : Icons.iconFromName(
+                                                                       model.appIcon, "application-x-executable")
                     fallbackIcon: "apps"
                     borderColor: Color.transparent
                     borderWidth: 0
-                    visible: imagePath && imagePath !== ""
+                    visible: (imagePath && imagePath !== "")
                   }
 
                   Column {

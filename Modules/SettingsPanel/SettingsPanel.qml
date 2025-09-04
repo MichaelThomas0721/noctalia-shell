@@ -24,14 +24,14 @@ NPanel {
   panelAnchorHorizontalCenter: true
   panelAnchorVerticalCenter: true
 
-  // Enable keyboard focus for settings panel
   panelKeyboardFocus: true
 
   // Tabs enumeration, order is NOT relevant
   enum Tab {
     About,
-    AudioService,
+    Audio,
     Bar,
+    Hooks,
     Launcher,
     Brightness,
     ColorScheme,
@@ -112,6 +112,10 @@ NPanel {
     id: aboutTab
     Tabs.AboutTab {}
   }
+  Component {
+    id: hooksTab
+    Tabs.HooksTab {}
+  }
 
   // Order *DOES* matter
   function updateTabsModel() {
@@ -131,7 +135,7 @@ NPanel {
                      "icon": "apps",
                      "source": launcherTab
                    }, {
-                     "id": SettingsPanel.Tab.AudioService,
+                     "id": SettingsPanel.Tab.Audio,
                      "label": "Audio",
                      "icon": "volume_up",
                      "source": audioTab
@@ -182,6 +186,11 @@ NPanel {
                    "label": "Screen Recorder",
                    "icon": "videocam",
                    "source": screenRecorderTab
+                 }, {
+                   "id": SettingsPanel.Tab.Hooks,
+                   "label": "Hooks",
+                   "icon": "link",
+                   "source": hooksTab
                  }, {
                    "id": SettingsPanel.Tab.About,
                    "label": "About",

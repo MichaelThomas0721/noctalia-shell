@@ -52,6 +52,8 @@ Loader {
   property alias isClosing: hideTimer.running
   readonly property real barHeight: Math.round(Style.barHeight * scaling)
   readonly property bool barAtBottom: Settings.data.bar.position === "bottom"
+  readonly property bool barIsVisible: (screen !== null) && (Settings.data.bar.monitors.includes(screen.name)
+                                                             || (Settings.data.bar.monitors.length === 0))
 
   signal opened
   signal closed
@@ -124,6 +126,7 @@ Loader {
     root.closed()
     active = false
     useButtonPosition = false // Reset button position usage
+    PanelService.closedPanel(root)
   }
 
   // -----------------------------------------
@@ -145,9 +148,8 @@ Loader {
       visible: true
 
       // Dim desktop if required
-      color: (root.active && !root.isClosing && Settings.data.general.dimDesktop) ? Color.applyOpacity(
-                                                                                      Color.mShadow,
-                                                                                      "BB") : Color.transparent
+      color: (root.active && !root.isClosing
+              && Settings.data.general.dimDesktop) ? Qt.alpha(Color.mShadow, Style.opacityHeavy) : Color.transparent
 
       WlrLayershell.exclusionMode: ExclusionMode.Ignore
       WlrLayershell.namespace: "noctalia-panel"
@@ -163,8 +165,8 @@ Loader {
       anchors.left: true
       anchors.right: true
       anchors.bottom: true
-      margins.top: !barAtBottom ? barHeight : 0
-      margins.bottom: barAtBottom ? barHeight : 0
+      margins.top: (barIsVisible && !barAtBottom) ? barHeight : 0
+      margins.bottom: (barIsVisible && barAtBottom) ? barHeight : 0
 
       // Close any panel with Esc without requiring focus
       Shortcut {
