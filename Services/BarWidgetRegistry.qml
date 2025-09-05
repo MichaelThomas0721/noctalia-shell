@@ -18,12 +18,14 @@ Singleton {
                            "Clock": clockComponent,
                            "CustomButton": customButtonComponent,
                            "DarkModeToggle": darkModeToggle,
+                           "KeepAwake": keepAwakeComponent,
                            "KeyboardLayout": keyboardLayoutComponent,
                            "MediaMini": mediaMiniComponent,
                            "Microphone": microphoneComponent,
                            "NightLight": nightLightComponent,
                            "NotificationHistory": notificationHistoryComponent,
                            "PowerProfile": powerProfileComponent,
+                           "PowerToggle": powerToggleComponent,
                            "ScreenRecorderIndicator": screenRecorderIndicatorComponent,
                            "SidePanelToggle": sidePanelToggleComponent,
                            "SystemMonitor": systemMonitorComponent,
@@ -72,6 +74,9 @@ Singleton {
   property Component keyboardLayoutComponent: Component {
     KeyboardLayout {}
   }
+  property Component keepAwakeComponent: Component {
+    KeepAwake {}
+  }
   property Component mediaMiniComponent: Component {
     MediaMini {}
   }
@@ -86,6 +91,9 @@ Singleton {
   }
   property Component powerProfileComponent: Component {
     PowerProfile {}
+  }
+  property Component powerToggleComponent: Component {
+    PowerToggle {}
   }
   property Component screenRecorderIndicatorComponent: Component {
     ScreenRecorderIndicator {}

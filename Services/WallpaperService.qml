@@ -220,7 +220,7 @@ Singleton {
   }
 
   // -------------------------------------------------------------------
-  function changeWallpaper(screenName, path) {
+  function changeWallpaper(path, screenName) {
     if (screenName !== undefined) {
       _setWallpaper(screenName, path)
     } else {
@@ -286,11 +286,6 @@ Singleton {
     // Emit signal for this specific wallpaper change
     root.wallpaperChanged(screenName, path)
 
-    // Execute wallpaper change hook after the change is complete
-    if (HooksService) {
-      HooksService.executeWallpaperHook(path, screenName)
-    }
-
     // Restart the random wallpaper timer
     if (randomWallpaperTimer.running) {
       randomWallpaperTimer.restart()
@@ -310,7 +305,7 @@ Singleton {
         if (wallpaperList.length > 0) {
           var randomIndex = Math.floor(Math.random() * wallpaperList.length)
           var randomPath = wallpaperList[randomIndex]
-          changeWallpaper(screenName, randomPath)
+          changeWallpaper(randomPath, screenName)
         }
       }
     } else {
@@ -320,7 +315,7 @@ Singleton {
       if (wallpaperList.length > 0) {
         var randomIndex = Math.floor(Math.random() * wallpaperList.length)
         var randomPath = wallpaperList[randomIndex]
-        changeWallpaper(undefined, randomPath)
+        changeWallpaper(randomPath, undefined)
       }
     }
   }
