@@ -80,7 +80,7 @@ Singleton {
     JsonAdapter {
       id: historyAdapter
       property var history: []
-      property double timestamp: 0
+      property real timestamp: 0
     }
   }
 
@@ -118,12 +118,13 @@ Singleton {
 
   // Function to add notification to model
   function addNotification(notification) {
+    const resolvedImage = resolveNotificationImage(notification)
     notificationModel.insert(0, {
                                "rawNotification": notification,
                                "summary": notification.summary,
                                "body": notification.body,
                                "appName": notification.appName,
-                               "image": notification.image,
+                               "image": resolvedImage,
                                "appIcon": notification.appIcon,
                                "urgency": notification.urgency,
                                "timestamp": new Date()
@@ -136,6 +137,40 @@ Singleton {
         oldestNotification.dismiss()
       }
       notificationModel.remove(notificationModel.count - 1)
+    }
+  }
+
+  // Resolve an image path for a notification, supporting icon names and absolute paths
+  function resolveNotificationImage(notification) {
+    try {
+      // If an explicit image is already provided, prefer it
+      if (notification && notification.image && notification.image !== "") {
+        return notification.image
+      }
+
+      // Fallback to appIcon which may be a name or a path (notify-send -i)
+      const icon = notification ? (notification.appIcon || "") : ""
+      if (!icon)
+        return ""
+
+      // Accept absolute file paths or file URLs directly
+      if (icon.startsWith("/")) {
+        return icon
+      }
+      if (icon.startsWith("file://")) {
+        // Strip the scheme for QML image source compatibility
+        return icon.substring("file://".length)
+      }
+
+      // Resolve themed icon names to absolute paths
+      try {
+        const p = Icons.iconFromName(icon, "")
+        return p || ""
+      } catch (e2) {
+        return ""
+      }
+    } catch (e) {
+      return ""
     }
   }
 
@@ -166,12 +201,17 @@ Singleton {
       const items = historyAdapter.history || []
       for (var i = 0; i < items.length; i++) {
         const it = items[i]
+        // Coerce legacy second-based timestamps to milliseconds
+        var ts = it.timestamp
+        if (typeof ts === "number" && ts < 1e12) {
+          ts = ts * 1000
+        }
         historyModel.append({
                               "summary": it.summary || "",
                               "body": it.body || "",
                               "appName": it.appName || "",
                               "urgency": it.urgency,
-                              "timestamp": it.timestamp ? new Date(it.timestamp) : new Date()
+                              "timestamp": ts ? new Date(ts) : new Date()
                             })
       }
     } catch (e) {
@@ -190,7 +230,10 @@ Singleton {
                    "body": n.body,
                    "appName": n.appName,
                    "urgency": n.urgency,
-                   "timestamp": (n.timestamp instanceof Date) ? n.timestamp.getTime() : n.timestamp
+                   "timestamp"// Always persist in milliseconds
+                   : (n.timestamp instanceof Date) ? n.timestamp.getTime(
+                                                       ) : (typeof n.timestamp === "number"
+                                                            && n.timestamp < 1e12 ? n.timestamp * 1000 : n.timestamp)
                  })
       }
       historyAdapter.history = arr
