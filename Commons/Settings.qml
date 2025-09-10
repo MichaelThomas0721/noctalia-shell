@@ -93,7 +93,22 @@ Singleton {
     }
 
     // -----------------
-    // 2nd. migrate global settings to user settings
+    // 2nd. remove any non existing widget type
+    for (var s = 0; s < sections.length; s++) {
+      const sectionName = sections[s]
+      const widgets = adapter.bar.widgets[sectionName]
+      // Iterate backward through the widgets array, so it does not break when removing a widget
+      for (var i = widgets.length - 1; i >= 0; i--) {
+        var widget = widgets[i]
+        if (!BarWidgetRegistry.hasWidget(widget.id)) {
+          widgets.splice(i, 1)
+          Logger.warn(`Settings`, `Deleted invalid widget ${widget.id}`)
+        }
+      }
+    }
+
+    // -----------------
+    // 3nd. migrate global settings to user settings
     for (var s = 0; s < sections.length; s++) {
       const sectionName = sections[s]
       for (var i = 0; i < adapter.bar.widgets[sectionName].length; i++) {
@@ -105,60 +120,63 @@ Singleton {
           continue
         }
 
-        // Check that the widget was not previously migrated and skip if necessary
-        const keys = Object.keys(widget)
-        if (keys.length > 1) {
-          continue
+        if (upgradeWidget(widget)) {
+          Logger.log("Settings", `Upgraded ${widget.id} widget:`, JSON.stringify(widget))
         }
-
-        migrateWidget(widget)
-        Logger.log("Settings", JSON.stringify(widget))
       }
     }
   }
 
   // -----------------------------------------------------
-  function migrateWidget(widget) {
-    Logger.log("Settings", `Migrating '${widget.id}' widget`)
+  function upgradeWidget(widget) {
+    // Backup the widget definition before altering
+    const widgetBefore = JSON.stringify(widget)
 
+    // Migrate old bar settings to proper per widget settings
     switch (widget.id) {
     case "ActiveWindow":
-      widget.showIcon = adapter.bar.showActiveWindowIcon
+      widget.showIcon = widget.showIcon !== undefined ? widget.showIcon : adapter.bar.showActiveWindowIcon
       break
     case "Battery":
-      widget.alwaysShowPercentage = adapter.bar.alwaysShowBatteryPercentage
-      break
-    case "Brightness":
-      widget.alwaysShowPercentage = BarWidgetRegistry.widgetMetadata[widget.id].alwaysShowPercentage
+      widget.alwaysShowPercentage = widget.alwaysShowPercentage
+          !== undefined ? widget.alwaysShowPercentage : adapter.bar.alwaysShowBatteryPercentage
       break
     case "Clock":
-      widget.showDate = adapter.location.showDateWithClock
-      widget.use12HourClock = adapter.location.use12HourClock
-      widget.reverseDayMonth = adapter.location.reverseDayMonth
-      widget.showSeconds = BarWidgetRegistry.widgetMetadata[widget.id].showSeconds
+      widget.showDate = widget.showDate !== undefined ? widget.showDate : adapter.location.showDateWithClock
+      widget.use12HourClock = widget.use12HourClock !== undefined ? widget.use12HourClock : adapter.location.use12HourClock
+      widget.reverseDayMonth = widget.reverseDayMonth !== undefined ? widget.reverseDayMonth : adapter.location.reverseDayMonth
       break
     case "MediaMini":
-      widget.showAlbumArt = adapter.audio.showMiniplayerAlbumArt
-      widget.showVisualizer = adapter.audio.showMiniplayerCava
-      widget.visualizerType = BarWidgetRegistry.widgetMetadata[widget.id].visualizerType
-      break
-    case "NotificationHistory":
-      widget.showUnreadBadge = BarWidgetRegistry.widgetMetadata[widget.id].showUnreadBadge
-      widget.hideWhenZero = BarWidgetRegistry.widgetMetadata[widget.id].hideWhenZero
+      widget.showAlbumArt = widget.showAlbumArt !== undefined ? widget.showAlbumArt : adapter.audio.showMiniplayerAlbumArt
+      widget.showVisualizer = widget.showVisualizer !== undefined ? widget.showVisualizer : adapter.audio.showMiniplayerCava
       break
     case "SidePanelToggle":
-      widget.useDistroLogo = adapter.bar.useDistroLogo
+      widget.useDistroLogo = widget.useDistroLogo !== undefined ? widget.useDistroLogo : adapter.bar.useDistroLogo
       break
     case "SystemMonitor":
-      widget.showNetworkStats = adapter.bar.showNetworkStats
-      break
-    case "Volume":
-      widget.alwaysShowPercentage = BarWidgetRegistry.widgetMetadata[widget.id].alwaysShowPercentage
+      widget.showNetworkStats = widget.showNetworkStats !== undefined ? widget.showNetworkStats : adapter.bar.showNetworkStats
       break
     case "Workspace":
-      widget.labelMode = adapter.bar.showWorkspaceLabel
+      widget.labelMode = widget.labelMode !== undefined ? widget.labelMode : adapter.bar.showWorkspaceLabel
       break
     }
+
+    // Inject missing default setting (metaData) from BarWidgetRegistry
+    const keys = Object.keys(BarWidgetRegistry.widgetMetadata[widget.id])
+    for (var i = 0; i < keys.length; i++) {
+      const k = keys[i]
+      if (k === "id" || k === "allowUserSettings") {
+        continue
+      }
+
+      if (widget[k] === undefined) {
+        widget[k] = BarWidgetRegistry.widgetMetadata[widget.id][k]
+      }
+    }
+
+    // Backup the widget definition before altering
+    const widgetAfter = JSON.stringify(widget)
+    return (widgetAfter !== widgetBefore)
   }
   // -----------------------------------------------------
   // Kickoff essential services
@@ -175,6 +193,8 @@ Singleton {
     FontService.init()
 
     HooksService.init()
+
+    BluetoothService.init()
   }
 
   // -----------------------------------------------------
@@ -200,14 +220,15 @@ Singleton {
 
   FileView {
     id: settingsFileView
-    path: directoriesCreated ? settingsFile : ""
+    path: directoriesCreated ? settingsFile : undefined
+    printErrors: false
     watchChanges: true
     onFileChanged: reload()
     onAdapterUpdated: saveTimer.start()
 
     // Trigger initial load when path changes from empty to actual path
     onPathChanged: {
-      if (path === settingsFile) {
+      if (path !== undefined) {
         reload()
       }
     }
@@ -215,13 +236,14 @@ Singleton {
       if (!isLoaded) {
         Logger.log("Settings", "----------------------------")
         Logger.log("Settings", "Settings loaded successfully")
-        isLoaded = true
 
         upgradeSettingsData()
 
         validateMonitorConfigurations()
 
         kickOffServices()
+
+        isLoaded = true
 
         // Emit the signal
         root.settingsLoaded()
@@ -421,6 +443,7 @@ Singleton {
       // night light
       property JsonObject nightLight: JsonObject {
         property bool enabled: false
+        property bool forced: false
         property bool autoSchedule: true
         property string nightTemp: "4000"
         property string dayTemp: "6500"

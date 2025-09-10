@@ -11,7 +11,6 @@ Singleton {
   // Widget registry object mapping widget names to components
   property var widgets: ({
                            "ActiveWindow": activeWindowComponent,
-                           "ArchUpdater": archUpdaterComponent,
                            "Battery": batteryComponent,
                            "Bluetooth": bluetoothComponent,
                            "Brightness": brightnessComponent,
@@ -60,7 +59,7 @@ Singleton {
                                   },
                                   "CustomButton": {
                                     "allowUserSettings": true,
-                                    "icon": "favorite",
+                                    "icon": "heart",
                                     "leftClickExec": "",
                                     "rightClickExec": "",
                                     "middleClickExec": ""
@@ -82,9 +81,11 @@ Singleton {
                                     "allowUserSettings": true,
                                     "showCpuUsage": true,
                                     "showCpuTemp": true,
+                                    "showGpuTemp": false,
                                     "showMemoryUsage": true,
                                     "showMemoryAsPercent": false,
-                                    "showNetworkStats": false
+                                    "showNetworkStats": false,
+                                    "showDiskUsage": false
                                   },
                                   "Workspace": {
                                     "allowUserSettings": true,
@@ -109,9 +110,6 @@ Singleton {
   // Component definitions - these are loaded once at startup
   property Component activeWindowComponent: Component {
     ActiveWindow {}
-  }
-  property Component archUpdaterComponent: Component {
-    ArchUpdater {}
   }
   property Component batteryComponent: Component {
     Battery {}

@@ -16,19 +16,24 @@ ColumnLayout {
   // Local, editable state for checkboxes
   property bool valueShowCpuUsage: widgetData.showCpuUsage !== undefined ? widgetData.showCpuUsage : widgetMetadata.showCpuUsage
   property bool valueShowCpuTemp: widgetData.showCpuTemp !== undefined ? widgetData.showCpuTemp : widgetMetadata.showCpuTemp
+  property bool valueShowGpuTemp: widgetData.showGpuTemp !== undefined ? widgetData.showGpuTemp : (widgetMetadata.showGpuTemp
+                                                                                                   || false)
   property bool valueShowMemoryUsage: widgetData.showMemoryUsage !== undefined ? widgetData.showMemoryUsage : widgetMetadata.showMemoryUsage
   property bool valueShowMemoryAsPercent: widgetData.showMemoryAsPercent
                                           !== undefined ? widgetData.showMemoryAsPercent : widgetMetadata.showMemoryAsPercent
   property bool valueShowNetworkStats: widgetData.showNetworkStats
                                        !== undefined ? widgetData.showNetworkStats : widgetMetadata.showNetworkStats
+  property bool valueShowDiskUsage: widgetData.showDiskUsage !== undefined ? widgetData.showDiskUsage : widgetMetadata.showDiskUsage
 
   function saveSettings() {
     var settings = Object.assign({}, widgetData || {})
     settings.showCpuUsage = valueShowCpuUsage
     settings.showCpuTemp = valueShowCpuTemp
+    settings.showGpuTemp = valueShowGpuTemp
     settings.showMemoryUsage = valueShowMemoryUsage
     settings.showMemoryAsPercent = valueShowMemoryAsPercent
     settings.showNetworkStats = valueShowNetworkStats
+    settings.showDiskUsage = valueShowDiskUsage
     return settings
   }
 
@@ -49,6 +54,14 @@ ColumnLayout {
   }
 
   NToggle {
+    id: showGpuTemp
+    Layout.fillWidth: true
+    label: "GPU temperature"
+    checked: valueShowGpuTemp
+    onToggled: checked => valueShowGpuTemp = checked
+  }
+
+  NToggle {
     id: showMemoryUsage
     Layout.fillWidth: true
     label: "Memory usage"
@@ -59,7 +72,7 @@ ColumnLayout {
   NToggle {
     id: showMemoryAsPercent
     Layout.fillWidth: true
-    label: "Show memory as percentage"
+    label: "Memory as percentage"
     checked: valueShowMemoryAsPercent
     onToggled: checked => valueShowMemoryAsPercent = checked
   }
@@ -70,5 +83,13 @@ ColumnLayout {
     label: "Network traffic"
     checked: valueShowNetworkStats
     onToggled: checked => valueShowNetworkStats = checked
+  }
+
+  NToggle {
+    id: showDiskUsage
+    Layout.fillWidth: true
+    label: "Storage usage"
+    checked: valueShowDiskUsage
+    onToggled: checked => valueShowDiskUsage = checked
   }
 }

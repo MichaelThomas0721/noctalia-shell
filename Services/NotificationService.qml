@@ -65,6 +65,7 @@ Singleton {
     id: historyFileView
     objectName: "notificationHistoryFileView"
     path: historyFile
+    printErrors: false
     watchChanges: true
     onFileChanged: reload()
     onAdapterUpdated: writeAdapter()
@@ -116,14 +117,51 @@ Singleton {
     }
   }
 
+  // Function to resolve app name from notification
+  function resolveAppName(notification) {
+    try {
+      const appName = notification.appName || ""
+
+      // If it's already a clean name (no dots or reverse domain notation), use it
+      if (!appName.includes(".") || appName.length < 10) {
+        return appName
+      }
+
+      // Try to find a desktop entry for this app ID
+      const desktopEntries = DesktopEntries.byId(appName)
+      if (desktopEntries && desktopEntries.length > 0) {
+        const entry = desktopEntries[0]
+        // Prefer name over genericName, fallback to original appName
+        return entry.name || entry.genericName || appName
+      }
+
+      // If no desktop entry found, try to clean up the app ID
+      // Convert "org.gnome.Nautilus" to "Nautilus"
+      const parts = appName.split(".")
+      if (parts.length > 1) {
+        // Take the last part and capitalize it
+        const lastPart = parts[parts.length - 1]
+        return lastPart.charAt(0).toUpperCase() + lastPart.slice(1)
+      }
+
+      return appName
+    } catch (e) {
+      // Fallback to original app name on any error
+      return notification.appName || ""
+    }
+  }
+
   // Function to add notification to model
   function addNotification(notification) {
     const resolvedImage = resolveNotificationImage(notification)
+    const resolvedAppName = resolveAppName(notification)
+
     notificationModel.insert(0, {
                                "rawNotification": notification,
                                "summary": notification.summary,
                                "body": notification.body,
-                               "appName": notification.appName,
+                               "appName": resolvedAppName,
+                               "desktopEntry": notification.desktopEntry,
                                "image": resolvedImage,
                                "appIcon": notification.appIcon,
                                "urgency": notification.urgency,
@@ -164,7 +202,7 @@ Singleton {
 
       // Resolve themed icon names to absolute paths
       try {
-        const p = Icons.iconFromName(icon, "")
+        const p = AppIcons.iconFromName(icon, "")
         return p || ""
       } catch (e2) {
         return ""
@@ -174,12 +212,17 @@ Singleton {
     }
   }
 
-  // Add a simplified copy into persistent history
   function addToHistory(notification) {
+    const resolvedAppName = resolveAppName(notification)
+    const resolvedImage = resolveNotificationImage(notification)
+
     historyModel.insert(0, {
                           "summary": notification.summary,
                           "body": notification.body,
-                          "appName": notification.appName,
+                          "appName": resolvedAppName,
+                          "desktopEntry": notification.desktopEntry || "",
+                          "image": resolvedImage,
+                          "appIcon": notification.appIcon || "",
                           "urgency": notification.urgency,
                           "timestamp": new Date()
                         })
@@ -210,6 +253,9 @@ Singleton {
                               "summary": it.summary || "",
                               "body": it.body || "",
                               "appName": it.appName || "",
+                              "desktopEntry": it.desktopEntry || "",
+                              "image": it.image || "",
+                              "appIcon": it.appIcon || "",
                               "urgency": it.urgency,
                               "timestamp": ts ? new Date(ts) : new Date()
                             })
@@ -229,6 +275,9 @@ Singleton {
                    "summary": n.summary,
                    "body": n.body,
                    "appName": n.appName,
+                   "desktopEntry": n.desktopEntry,
+                   "image": n.image,
+                   "appIcon": n.appIcon,
                    "urgency": n.urgency,
                    "timestamp"// Always persist in milliseconds
                    : (n.timestamp instanceof Date) ? n.timestamp.getTime(

@@ -107,6 +107,7 @@ Popup {
     RowLayout {
       Layout.fillWidth: true
       Layout.topMargin: Style.marginM * scaling
+      spacing: Style.marginM * scaling
 
       Item {
         Layout.fillWidth: true

@@ -43,9 +43,9 @@ Item {
 
   function getIcon() {
     if (AudioService.muted) {
-      return "volume_off"
+      return "volume-mute"
     }
-    return AudioService.volume <= Number.EPSILON ? "volume_off" : (AudioService.volume < 0.33 ? "volume_down" : "volume_up")
+    return (AudioService.volume <= Number.EPSILON) ? "volume-zero" : (AudioService.volume <= 0.5) ? "volume-low" : "volume-high"
   }
 
   // Connection used to open the pill when volume changes
@@ -77,8 +77,6 @@ Item {
 
     rightOpen: BarWidgetRegistry.getNPillDirection(root)
     icon: getIcon()
-    iconCircleColor: Color.mPrimary
-    collapsedIconColor: Color.mOnSurface
     autoHide: false // Important to be false so we can hover as long as we want
     text: Math.floor(AudioService.volume * 100) + "%"
     forceOpen: alwaysShowPercentage

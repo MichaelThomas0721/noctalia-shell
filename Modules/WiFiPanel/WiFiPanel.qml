@@ -34,7 +34,7 @@ NPanel {
         spacing: Style.marginM * scaling
 
         NIcon {
-          text: Settings.data.network.wifiEnabled ? "wifi" : "wifi_off"
+          icon: Settings.data.network.wifiEnabled ? "wifi" : "wifi-off"
           font.pointSize: Style.fontSizeXXL * scaling
           color: Settings.data.network.wifiEnabled ? Color.mPrimary : Color.mOnSurfaceVariant
         }
@@ -91,7 +91,7 @@ NPanel {
           spacing: Style.marginS * scaling
 
           NIcon {
-            text: "error"
+            icon: "warning"
             font.pointSize: Style.fontSizeL * scaling
             color: Color.mError
           }
@@ -129,7 +129,7 @@ NPanel {
           }
 
           NIcon {
-            text: "wifi_off"
+            icon: "wifi-off"
             font.pointSize: 64 * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
@@ -245,7 +245,7 @@ NPanel {
                     spacing: Style.marginS * scaling
 
                     NIcon {
-                      text: NetworkService.signalIcon(modelData.signal)
+                      icon: NetworkService.signalIcon(modelData.signal)
                       font.pointSize: Style.fontSizeXXL * scaling
                       color: modelData.connected ? Color.mPrimary : Color.mOnSurface
                     }
@@ -377,7 +377,7 @@ NPanel {
                                  && NetworkService.connectingTo !== modelData.ssid
                                  && NetworkService.forgettingNetwork !== modelData.ssid
                                  && NetworkService.disconnectingFrom !== modelData.ssid
-                        icon: "delete"
+                        icon: "trash"
                         tooltipText: "Forget network"
                         sizeRatio: 0.7
                         onClicked: expandedSsid = expandedSsid === modelData.ssid ? "" : modelData.ssid
@@ -521,7 +521,7 @@ NPanel {
 
                       RowLayout {
                         NIcon {
-                          text: "delete_outline"
+                          icon: "trash"
                           font.pointSize: Style.fontSizeL * scaling
                           color: Color.mError
                         }
@@ -571,7 +571,7 @@ NPanel {
           }
 
           NIcon {
-            text: "wifi_find"
+            icon: "search"
             font.pointSize: 64 * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter

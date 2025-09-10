@@ -123,52 +123,52 @@ NPanel {
     let newTabs = [{
                      "id": SettingsPanel.Tab.General,
                      "label": "General",
-                     "icon": "tune",
+                     "icon": "settings-general",
                      "source": generalTab
                    }, {
                      "id": SettingsPanel.Tab.Bar,
                      "label": "Bar",
-                     "icon": "web_asset",
+                     "icon": "settings-bar",
                      "source": barTab
                    }, {
                      "id": SettingsPanel.Tab.Launcher,
                      "label": "Launcher",
-                     "icon": "apps",
+                     "icon": "settings-launcher",
                      "source": launcherTab
                    }, {
                      "id": SettingsPanel.Tab.Audio,
                      "label": "Audio",
-                     "icon": "volume_up",
+                     "icon": "settings-audio",
                      "source": audioTab
                    }, {
                      "id": SettingsPanel.Tab.Display,
                      "label": "Display",
-                     "icon": "monitor",
+                     "icon": "settings-display",
                      "source": displayTab
                    }, {
                      "id": SettingsPanel.Tab.Network,
                      "label": "Network",
-                     "icon": "lan",
+                     "icon": "settings-network",
                      "source": networkTab
                    }, {
                      "id": SettingsPanel.Tab.Brightness,
                      "label": "Brightness",
-                     "icon": "brightness_6",
+                     "icon": "settings-brightness",
                      "source": brightnessTab
                    }, {
                      "id": SettingsPanel.Tab.Weather,
                      "label": "Weather",
-                     "icon": "partly_cloudy_day",
+                     "icon": "settings-weather",
                      "source": weatherTab
                    }, {
                      "id": SettingsPanel.Tab.ColorScheme,
                      "label": "Color Scheme",
-                     "icon": "palette",
+                     "icon": "settings-color-scheme",
                      "source": colorSchemeTab
                    }, {
                      "id": SettingsPanel.Tab.Wallpaper,
                      "label": "Wallpaper",
-                     "icon": "image",
+                     "icon": "settings-wallpaper",
                      "source": wallpaperTab
                    }]
 
@@ -177,7 +177,7 @@ NPanel {
       newTabs.push({
                      "id": SettingsPanel.Tab.WallpaperSelector,
                      "label": "Wallpaper Selector",
-                     "icon": "wallpaper_slideshow",
+                     "icon": "settings-wallpaper-selector",
                      "source": wallpaperSelectorTab
                    })
     }
@@ -185,17 +185,17 @@ NPanel {
     newTabs.push({
                    "id": SettingsPanel.Tab.ScreenRecorder,
                    "label": "Screen Recorder",
-                   "icon": "videocam",
+                   "icon": "settings-screen-recorder",
                    "source": screenRecorderTab
                  }, {
                    "id": SettingsPanel.Tab.Hooks,
                    "label": "Hooks",
-                   "icon": "cable",
+                   "icon": "settings-hooks",
                    "source": hooksTab
                  }, {
                    "id": SettingsPanel.Tab.About,
                    "label": "About",
-                   "icon": "info",
+                   "icon": "settings-about",
                    "source": aboutTab
                  })
 
@@ -400,13 +400,13 @@ NPanel {
                   anchors.fill: parent
                   anchors.leftMargin: Style.marginS * scaling
                   anchors.rightMargin: Style.marginS * scaling
-                  spacing: Style.marginS * scaling
+                  spacing: Style.marginM * scaling
 
                   // Tab icon
                   NIcon {
-                    text: modelData.icon
+                    icon: modelData.icon
                     color: tabTextColor
-                    font.pointSize: Style.fontSizeL * scaling
+                    font.pointSize: Style.fontSizeXL * scaling
                   }
 
                   // Tab label
@@ -416,6 +416,7 @@ NPanel {
                     font.pointSize: Style.fontSizeM * scaling
                     font.weight: Style.fontWeightBold
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
                   }
                 }
 
@@ -461,7 +462,14 @@ NPanel {
               Layout.fillWidth: true
               spacing: Style.marginS * scaling
 
-              // Tab title
+              // Main icon
+              NIcon {
+                icon: root.tabsModel[currentTabIndex]?.icon
+                color: Color.mPrimary
+                font.pointSize: Style.fontSizeXL * scaling
+              }
+
+              // Main title
               NText {
                 text: root.tabsModel[currentTabIndex]?.label || ""
                 font.pointSize: Style.fontSizeXL * scaling
