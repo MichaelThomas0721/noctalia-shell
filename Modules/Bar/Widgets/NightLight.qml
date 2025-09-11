@@ -20,7 +20,7 @@ NIconButton {
   colorBorder: Color.transparent
   colorBorderHover: Color.transparent
 
-  icon: Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "alert-triangle" : "nightlight-on") : "nightlight-off"
+  icon: Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "nightlight-forced" : "nightlight-on") : "nightlight-off"
   tooltipText: `Night light: ${Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "forced." : "enabled.") : "disabled."}\nLeft click to cycle (disabled → normal → forced).\nRight click to access settings.`
   onClicked: {
     if (!Settings.data.nightLight.enabled) {
@@ -37,6 +37,6 @@ NIconButton {
   onRightClicked: {
     var settingsPanel = PanelService.getPanel("settingsPanel")
     settingsPanel.requestedTab = SettingsPanel.Tab.Brightness
-    settingsPanel.open(screen)
+    settingsPanel.open()
   }
 }

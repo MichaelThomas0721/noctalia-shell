@@ -52,9 +52,8 @@ Singleton {
                                   },
                                   "Clock": {
                                     "allowUserSettings": true,
-                                    "showDate": false,
+                                    "displayFormat": "time-date-short",
                                     "use12HourClock": false,
-                                    "showSeconds": false,
                                     "reverseDayMonth": true
                                   },
                                   "CustomButton": {
@@ -81,7 +80,6 @@ Singleton {
                                     "allowUserSettings": true,
                                     "showCpuUsage": true,
                                     "showCpuTemp": true,
-                                    "showGpuTemp": false,
                                     "showMemoryUsage": true,
                                     "showMemoryAsPercent": false,
                                     "showNetworkStats": false,
@@ -104,6 +102,10 @@ Singleton {
                                   "Volume": {
                                     "allowUserSettings": true,
                                     "alwaysShowPercentage": false
+                                  },
+                                  "KeyboardLayout": {
+                                    "allowUserSettings": true,
+                                    "forceOpen": false
                                   }
                                 })
 

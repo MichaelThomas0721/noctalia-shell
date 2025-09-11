@@ -40,8 +40,6 @@ RowLayout {
                                             !== undefined) ? widgetSettings.showNetworkStats : widgetMetadata.showNetworkStats
   readonly property bool showDiskUsage: (widgetSettings.showDiskUsage
                                          !== undefined) ? widgetSettings.showDiskUsage : widgetMetadata.showDiskUsage
-  readonly property bool showGpuTemp: (widgetSettings.showGpuTemp !== undefined) ? widgetSettings.showGpuTemp : (widgetMetadata.showGpuTemp
-                                                                                                                 || false)
 
   Layout.alignment: Qt.AlignVCenter
   spacing: Style.marginS * scaling
@@ -81,7 +79,7 @@ RowLayout {
           NText {
             text: `${SystemStatService.cpuUsage}%`
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
@@ -112,37 +110,7 @@ RowLayout {
           NText {
             text: `${SystemStatService.cpuTemp}°C`
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
-            font.weight: Style.fontWeightMedium
-            Layout.alignment: Qt.AlignVCenter
-            verticalAlignment: Text.AlignVCenter
-            color: Color.mPrimary
-          }
-        }
-      }
-
-      // GPU Temperature Component
-      Item {
-        Layout.preferredWidth: gpuTempRow.implicitWidth
-        Layout.preferredHeight: Math.round(Style.capsuleHeight * scaling)
-        Layout.alignment: Qt.AlignVCenter
-        visible: showGpuTemp
-
-        RowLayout {
-          id: gpuTempRow
-          anchors.centerIn: parent
-          spacing: Style.marginXS * scaling
-
-          NIcon {
-            icon: "gpu-temperature"
-            font.pointSize: Style.fontSizeS * scaling
-            Layout.alignment: Qt.AlignVCenter
-          }
-
-          NText {
-            text: `${SystemStatService.gpuTemp}°C`
-            font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
@@ -172,7 +140,7 @@ RowLayout {
           NText {
             text: showMemoryAsPercent ? `${SystemStatService.memPercent}%` : `${SystemStatService.memGb}G`
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
@@ -202,7 +170,7 @@ RowLayout {
           NText {
             text: SystemStatService.formatSpeed(SystemStatService.rxSpeed)
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
@@ -232,7 +200,7 @@ RowLayout {
           NText {
             text: SystemStatService.formatSpeed(SystemStatService.txSpeed)
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
@@ -262,7 +230,7 @@ RowLayout {
           NText {
             text: `${SystemStatService.diskPercent}%`
             font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeS * scaling
+            font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium
             Layout.alignment: Qt.AlignVCenter
             verticalAlignment: Text.AlignVCenter
