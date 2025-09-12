@@ -13,6 +13,7 @@ NPanel {
 
   preferredWidth: 380
   preferredHeight: 500
+  panelKeyboardFocus: true
 
   panelContent: Rectangle {
     color: Color.transparent
@@ -42,7 +43,7 @@ NPanel {
         }
 
         NToggle {
-          id: wifiSwitch
+          id: bluetoothSwitch
           checked: Settings.data.network.bluetoothEnabled
           onToggled: checked => BluetoothService.setBluetoothEnabled(checked)
           baseSize: Style.baseWidgetSize * 0.65 * scaling
@@ -108,12 +109,12 @@ NPanel {
         }
       }
 
-      ScrollView {
+      NScrollView {
         visible: BluetoothService.adapter && BluetoothService.adapter.enabled
         Layout.fillWidth: true
         Layout.fillHeight: true
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        horizontalPolicy: ScrollBar.AlwaysOff
+        verticalPolicy: ScrollBar.AsNeeded
         clip: true
         contentWidth: availableWidth
 

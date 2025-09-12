@@ -15,6 +15,7 @@ NPanel {
   preferredWidth: 380
   preferredHeight: 500
   panelAnchorRight: true
+  panelKeyboardFocus: true
 
   panelContent: Rectangle {
     id: notificationRect
@@ -56,7 +57,10 @@ NPanel {
           icon: "trash"
           tooltipText: "Clear history"
           sizeRatio: 0.8
-          onClicked: NotificationService.clearHistory()
+          onClicked: {
+            NotificationService.clearHistory()
+            root.close()
+          }
         }
 
         NIconButton {
@@ -115,10 +119,13 @@ NPanel {
       }
 
       // Notification list
-      ListView {
+      NListView {
         id: notificationList
         Layout.fillWidth: true
         Layout.fillHeight: true
+        horizontalPolicy: ScrollBar.AlwaysOff
+        verticalPolicy: ScrollBar.AsNeeded
+
         model: NotificationService.historyModel
         spacing: Style.marginM * scaling
         clip: true

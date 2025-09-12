@@ -323,6 +323,7 @@ Singleton {
         property bool dimDesktop: false
         property bool showScreenCorners: false
         property real radiusRatio: 1.0
+        property real screenRadiusRatio: 1.0
         // Animation speed multiplier (0.1x - 2.0x)
         property real animationSpeed: 1.0
       }
@@ -382,6 +383,7 @@ Singleton {
         property bool autoHide: false
         property bool exclusive: false
         property real backgroundOpacity: 1.0
+        property real floatingRatio: 1.0
         property list<string> monitors: []
       }
 
