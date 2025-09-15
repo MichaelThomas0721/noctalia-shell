@@ -43,12 +43,12 @@ Singleton {
                                   },
                                   "Battery": {
                                     "allowUserSettings": true,
-                                    "alwaysShowPercentage": false,
+                                    "displayMode": "onhover",
                                     "warningThreshold": 30
                                   },
                                   "Brightness": {
                                     "allowUserSettings": true,
-                                    "alwaysShowPercentage": false
+                                    "displayMode": "onhover"
                                   },
                                   "Clock": {
                                     "allowUserSettings": true,
@@ -65,7 +65,7 @@ Singleton {
                                   },
                                   "Microphone": {
                                     "allowUserSettings": true,
-                                    "alwaysShowPercentage": false
+                                    "displayMode": "onhover"
                                   },
                                   "NotificationHistory": {
                                     "allowUserSettings": true,
@@ -102,11 +102,11 @@ Singleton {
                                   },
                                   "Volume": {
                                     "allowUserSettings": true,
-                                    "alwaysShowPercentage": false
+                                    "displayMode": "onhover"
                                   },
                                   "KeyboardLayout": {
                                     "allowUserSettings": true,
-                                    "forceOpen": false
+                                    "displayMode": "onhover"
                                   }
                                 })
 

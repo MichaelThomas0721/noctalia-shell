@@ -263,9 +263,14 @@ Singleton {
 
       // bar
       property JsonObject bar: JsonObject {
-        property string position: "top" // "top" or "bottom"
+        property string position: "top" // "top", "bottom", "left", or "right"
         property real backgroundOpacity: 1.0
         property list<string> monitors: []
+
+        // Floating bar settings
+        property bool floating: false
+        property real marginVertical: 0.25
+        property real marginHorizontal: 0.25
 
         property bool showActiveWindowIcon: true // TODO: delete
         property bool alwaysShowBatteryPercentage: false // TODO: delete
@@ -317,6 +322,7 @@ Singleton {
         property string avatarImage: defaultAvatar
         property bool dimDesktop: false
         property bool showScreenCorners: false
+        property bool forceBlackScreenCorners: false
         property real radiusRatio: 1.0
         property real screenRadiusRatio: 1.0
         // Animation speed multiplier (0.1x - 2.0x)
@@ -394,6 +400,10 @@ Singleton {
         property list<string> monitors: []
         // Last time the user opened the notification history (ms since epoch)
         property real lastSeenTs: 0
+        // Duration settings for different urgency levels (in seconds)
+        property int lowUrgencyDuration: 3
+        property int normalUrgencyDuration: 8
+        property int criticalUrgencyDuration: 15
       }
 
       // audio
@@ -440,6 +450,7 @@ Singleton {
         property bool foot: false
         property bool fuzzel: false
         property bool vesktop: false
+        property bool pywalfox: false
         property bool enableUserTemplates: false
       }
 

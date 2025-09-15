@@ -28,7 +28,8 @@ Item {
     return {}
   }
 
-  readonly property bool userAlwaysShowPercentage: (widgetSettings.alwaysShowPercentage !== undefined) ? widgetSettings.alwaysShowPercentage : widgetMetadata.alwaysShowPercentage
+  readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
+  readonly property string displayMode: (widgetSettings.displayMode !== undefined) ? widgetSettings.displayMode : widgetMetadata.displayMode
 
   // Used to avoid opening the pill on Quickshell startup
   property bool firstBrightnessReceived: false
@@ -80,14 +81,16 @@ Item {
     autoHide: false // Important to be false so we can hover as long as we want
     text: {
       var monitor = getMonitor()
-      return monitor ? (Math.round(monitor.brightness * 100) + "%") : ""
+      return monitor ? Math.round(monitor.brightness * 100) : ""
     }
-    forceOpen: userAlwaysShowPercentage
+    suffix: text.length > 0 ? "%" : "-"
+    forceOpen: displayMode === "alwaysShow"
+    forceClose: displayMode === "alwaysHide"
     tooltipText: {
       var monitor = getMonitor()
       if (!monitor)
         return ""
-      return "Brightness: " + Math.round(monitor.brightness * 100) + "%\nMethod: " + monitor.method + "\nLeft click for advanced settings.\nScroll up/down to change brightness."
+      return "Brightness: " + Math.round(monitor.brightness * 100) + "%\nRight click for settings.\nScroll to modify brightness."
     }
 
     onWheel: function (angle) {
@@ -103,7 +106,13 @@ Item {
 
     onClicked: {
       var settingsPanel = PanelService.getPanel("settingsPanel")
-      settingsPanel.requestedTab = SettingsPanel.Tab.Brightness
+      settingsPanel.requestedTab = SettingsPanel.Tab.Display
+      settingsPanel.open()
+    }
+
+    onRightClicked: {
+      var settingsPanel = PanelService.getPanel("settingsPanel")
+      settingsPanel.requestedTab = SettingsPanel.Tab.Display
       settingsPanel.open()
     }
   }

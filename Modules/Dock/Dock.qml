@@ -147,7 +147,7 @@ Variants {
 
     // DOCK WINDOW
     Loader {
-      active: Settings.isLoaded && modelData && Settings.data.dock.monitors.includes(modelData.name) && dockLoaded
+      active: Settings.isLoaded && modelData && Settings.data.dock.monitors.includes(modelData.name) && dockLoaded && ToplevelManager && (ToplevelManager.toplevels.values.length > 0)
 
       sourceComponent: PanelWindow {
         id: dockWindow
@@ -166,7 +166,15 @@ Variants {
 
         // Position above the bar if it's at bottom
         anchors.bottom: true
-        margins.bottom: barAtBottom ? barHeight + floatingMargin : floatingMargin
+
+        margins.bottom: {
+          switch (Settings.data.bar.position) {
+          case "bottom":
+            return (Style.barHeight + Style.marginM) * scaling + (Settings.data.bar.floating ? Settings.data.bar.marginVertical * Style.marginXL * scaling + floatingMargin : floatingMargin)
+          default:
+            return floatingMargin
+          }
+        }
 
         // Rectangle {
         //   anchors.fill: parent
@@ -209,7 +217,7 @@ Variants {
             anchors.centerIn: parent
             radius: Style.radiusL * scaling
             border.width: Math.max(1, Style.borderS * scaling)
-            border.color: Color.mOutline
+            border.color: Qt.alpha(Color.mOutline, Settings.data.dock.backgroundOpacity)
 
             MouseArea {
               id: dockMouseArea

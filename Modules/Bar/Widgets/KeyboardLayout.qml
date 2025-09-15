@@ -30,7 +30,7 @@ Item {
     return {}
   }
 
-  readonly property bool forceOpen: (widgetSettings.forceOpen !== undefined) ? widgetSettings.forceOpen : widgetMetadata.forceOpen
+  readonly property string displayMode: (widgetSettings.displayMode !== undefined) ? widgetSettings.displayMode : widgetMetadata.displayMode
 
   // Use the shared service for keyboard layout
   property string currentLayout: KeyboardLayoutService.currentLayout
@@ -47,9 +47,8 @@ Item {
     autoHide: false // Important to be false so we can hover as long as we want
     text: currentLayout.toUpperCase()
     tooltipText: "Keyboard layout: " + currentLayout.toUpperCase()
-    forceOpen: root.forceOpen
-    fontSize: Style.fontSizeS // Use larger font size
-
+    forceOpen: root.displayMode === "forceOpen"
+    forceClose: root.displayMode === "alwaysHide"
     onClicked: {
 
       // You could open keyboard settings here if needed
