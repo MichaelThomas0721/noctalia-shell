@@ -14,8 +14,9 @@ NIconButton {
   property ShellScreen screen
   property real scaling: 1.0
 
-  sizeRatio: 0.8
-  colorBg: Settings.data.nightLight.forced ? Color.mPrimary : Color.mSurfaceVariant
+  compact: (Settings.data.bar.density === "compact")
+  baseSize: Style.capsuleHeight
+  colorBg: Settings.data.nightLight.forced ? Color.mPrimary : (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent)
   colorFg: Settings.data.nightLight.forced ? Color.mOnPrimary : Color.mOnSurface
   colorBorder: Color.transparent
   colorBorderHover: Color.transparent

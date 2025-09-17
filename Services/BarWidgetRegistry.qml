@@ -61,7 +61,9 @@ Singleton {
                                     "icon": "heart",
                                     "leftClickExec": "",
                                     "rightClickExec": "",
-                                    "middleClickExec": ""
+                                    "middleClickExec": "",
+                                    "textCommand": "",
+                                    "textIntervalMs": 3000
                                   },
                                   "Microphone": {
                                     "allowUserSettings": true,
@@ -205,7 +207,7 @@ Singleton {
     return (widgetMetadata[id] !== undefined) && (widgetMetadata[id].allowUserSettings === true)
   }
 
-  function getNPillDirection(widget) {
+  function getPillDirection(widget) {
     try {
       if (widget.section === "left") {
         return true

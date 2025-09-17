@@ -13,7 +13,7 @@ NIconButton {
   property real scaling: 1.0
   readonly property bool hasPP: PowerProfileService.available
 
-  sizeRatio: 0.8
+  baseSize: Style.capsuleHeight
   visible: hasPP
 
   function profileIcon() {
@@ -46,7 +46,8 @@ NIconButton {
 
   icon: root.profileIcon()
   tooltipText: root.profileName()
-  colorBg: (PowerProfileService.profile === PowerProfile.Balanced) ? Color.mSurfaceVariant : Color.mPrimary
+  compact: (Settings.data.bar.density === "compact")
+  colorBg: (PowerProfileService.profile === PowerProfile.Balanced) ? (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent) : Color.mPrimary
   colorFg: (PowerProfileService.profile === PowerProfile.Balanced) ? Color.mOnSurface : Color.mOnPrimary
   colorBorder: Color.transparent
   colorBorderHover: Color.transparent

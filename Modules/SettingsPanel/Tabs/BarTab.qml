@@ -45,32 +45,52 @@ ColumnLayout {
     description: "Configure bar appearance and positioning."
   }
 
-  RowLayout {
-    NComboBox {
-      Layout.fillWidth: true
-      label: "Bar Position"
-      description: "Choose where to place the bar on the screen."
-      model: ListModel {
-        ListElement {
-          key: "top"
-          name: "Top"
-        }
-        ListElement {
-          key: "bottom"
-          name: "Bottom"
-        }
-        ListElement {
-          key: "left"
-          name: "Left"
-        }
-        ListElement {
-          key: "right"
-          name: "Right"
-        }
+  NComboBox {
+    Layout.fillWidth: true
+    label: "Bar Position"
+    description: "Choose where to place the bar on the screen."
+    model: ListModel {
+      ListElement {
+        key: "top"
+        name: "Top"
       }
-      currentKey: Settings.data.bar.position
-      onSelected: key => Settings.data.bar.position = key
+      ListElement {
+        key: "bottom"
+        name: "Bottom"
+      }
+      ListElement {
+        key: "left"
+        name: "Left"
+      }
+      ListElement {
+        key: "right"
+        name: "Right"
+      }
     }
+    currentKey: Settings.data.bar.position
+    onSelected: key => Settings.data.bar.position = key
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    label: "Bar Density"
+    description: "Choose the density of the bar."
+    model: ListModel {
+      ListElement {
+        key: "compact"
+        name: "Compact"
+      }
+      ListElement {
+        key: "default"
+        name: "Default"
+      }
+      ListElement {
+        key: "comfortable"
+        name: "Comfortable"
+      }
+    }
+    currentKey: Settings.data.bar.density
+    onSelected: key => Settings.data.bar.density = key
   }
 
   ColumnLayout {
@@ -92,6 +112,15 @@ ColumnLayout {
       text: Math.floor(Settings.data.bar.backgroundOpacity * 100) + "%"
     }
   }
+
+  NToggle {
+    Layout.fillWidth: true
+    label: "Show Capsule"
+    description: "Adds a capsule behind each widget to improve readability on transparent bars."
+    checked: Settings.data.bar.showCapsule
+    onToggled: checked => Settings.data.bar.showCapsule = checked
+  }
+
   NToggle {
     Layout.fillWidth: true
     label: "Floating Bar"
@@ -163,40 +192,6 @@ ColumnLayout {
     Layout.bottomMargin: Style.marginXL * scaling
   }
 
-  // Monitor Configuration
-  ColumnLayout {
-    spacing: Style.marginM * scaling
-    Layout.fillWidth: true
-
-    NHeader {
-      label: "Monitors Configuration"
-      description: "Choose which monitors should display the bar."
-    }
-
-    Repeater {
-      model: Quickshell.screens || []
-      delegate: NCheckbox {
-        Layout.fillWidth: true
-        label: `${modelData.name || "Unknown"}${modelData.model ? `: ${modelData.model}` : ""}`
-        description: `${modelData.width}x${modelData.height} at (${modelData.x}, ${modelData.y})`
-        checked: (Settings.data.bar.monitors || []).indexOf(modelData.name) !== -1
-        onToggled: checked => {
-                     if (checked) {
-                       Settings.data.bar.monitors = addMonitor(Settings.data.bar.monitors, modelData.name)
-                     } else {
-                       Settings.data.bar.monitors = removeMonitor(Settings.data.bar.monitors, modelData.name)
-                     }
-                   }
-      }
-    }
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginXL * scaling
-    Layout.bottomMargin: Style.marginXL * scaling
-  }
-
   // Widgets Management Section
   ColumnLayout {
     spacing: Style.marginXXS * scaling
@@ -254,6 +249,40 @@ ColumnLayout {
         onUpdateWidgetSettings: (section, index, settings) => _updateWidgetSettingsInSection(section, index, settings)
         onDragPotentialStarted: root.handleDragStart()
         onDragPotentialEnded: root.handleDragEnd()
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginXL * scaling
+    Layout.bottomMargin: Style.marginXL * scaling
+  }
+
+  // Monitor Configuration
+  ColumnLayout {
+    spacing: Style.marginM * scaling
+    Layout.fillWidth: true
+
+    NHeader {
+      label: "Monitors Configuration"
+      description: "Show bar on specific monitors. Defaults to all if none are chosen."
+    }
+
+    Repeater {
+      model: Quickshell.screens || []
+      delegate: NCheckbox {
+        Layout.fillWidth: true
+        label: modelData.name || "Unknown"
+        description: `${modelData.model} - ${modelData.width}x${modelData.height} [x:${modelData.x} y:${modelData.y}]`
+        checked: (Settings.data.bar.monitors || []).indexOf(modelData.name) !== -1
+        onToggled: checked => {
+                     if (checked) {
+                       Settings.data.bar.monitors = addMonitor(Settings.data.bar.monitors, modelData.name)
+                     } else {
+                       Settings.data.bar.monitors = removeMonitor(Settings.data.bar.monitors, modelData.name)
+                     }
+                   }
       }
     }
   }

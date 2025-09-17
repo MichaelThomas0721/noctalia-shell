@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import qs.Commons
 import qs.Services
+import qs.Widgets
 
 Item {
   id: root
@@ -10,13 +11,13 @@ Item {
   property string text: ""
   property string suffix: ""
   property string tooltipText: ""
-  property real sizeRatio: 0.8
   property bool autoHide: false
   property bool forceOpen: false
   property bool forceClose: false
   property bool disableOpen: false
   property bool rightOpen: false
   property bool hovered: false
+  property bool compact: false
 
   readonly property string barPosition: Settings.data.bar.position
   readonly property bool isVerticalBar: barPosition === "left" || barPosition === "right"
@@ -41,18 +42,18 @@ Item {
 
     Component {
       id: verticalPillComponent
-      NPillVertical {
+      BarPillVertical {
         icon: root.icon
         text: root.text
         suffix: root.suffix
         tooltipText: root.tooltipText
-        sizeRatio: root.sizeRatio
         autoHide: root.autoHide
         forceOpen: root.forceOpen
         forceClose: root.forceClose
         disableOpen: root.disableOpen
         rightOpen: root.rightOpen
         hovered: root.hovered
+        compact: root.compact
         onShown: root.shown()
         onHidden: root.hidden()
         onEntered: root.entered()
@@ -66,18 +67,18 @@ Item {
 
     Component {
       id: horizontalPillComponent
-      NPillHorizontal {
+      BarPillHorizontal {
         icon: root.icon
         text: root.text
         suffix: root.suffix
         tooltipText: root.tooltipText
-        sizeRatio: root.sizeRatio
         autoHide: root.autoHide
         forceOpen: root.forceOpen
         forceClose: root.forceClose
         disableOpen: root.disableOpen
         rightOpen: root.rightOpen
         hovered: root.hovered
+        compact: root.compact
         onShown: root.shown()
         onHidden: root.hidden()
         onEntered: root.entered()

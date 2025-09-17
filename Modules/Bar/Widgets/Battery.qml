@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Services
 import qs.Widgets
+import qs.Modules.Bar.Extras
 
 Item {
   id: root
@@ -81,10 +82,11 @@ Item {
     }
   }
 
-  NPill {
+  BarPill {
     id: pill
 
-    rightOpen: BarWidgetRegistry.getNPillDirection(root)
+    compact: (Settings.data.bar.density === "compact")
+    rightOpen: BarWidgetRegistry.getPillDirection(root)
     icon: testMode ? BatteryService.getIcon(testPercent, testCharging, true) : BatteryService.getIcon(percent, charging, isReady)
     text: (isReady || testMode) ? Math.round(percent) : "-"
     suffix: "%"

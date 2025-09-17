@@ -33,9 +33,9 @@ NIconButton {
 
   icon: useDistroLogo ? "" : "noctalia"
   tooltipText: "Open side panel."
-  sizeRatio: 0.85
-
-  colorBg: Color.mSurfaceVariant
+  baseSize: Style.capsuleHeight
+  compact: (Settings.data.bar.density === "compact")
+  colorBg: (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent)
   colorFg: Color.mOnSurface
   colorBgHover: useDistroLogo ? Color.mSurfaceVariant : Color.mTertiary
   colorBorder: Color.transparent
@@ -46,10 +46,11 @@ NIconButton {
   IconImage {
     id: logo
     anchors.centerIn: parent
-    width: root.width * 0.85
+    width: root.width * 0.8
     height: width
     source: useDistroLogo ? DistroLogoService.osLogo : ""
     visible: useDistroLogo && source !== ""
     smooth: true
+    asynchronous: true
   }
 }

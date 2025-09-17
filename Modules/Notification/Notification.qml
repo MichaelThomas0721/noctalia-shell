@@ -259,6 +259,7 @@ Variants {
                     font.pointSize: Style.fontSizeL * scaling
                     font.weight: Style.fontWeightMedium
                     color: Color.mOnSurface
+                    textFormat: Text.PlainText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     Layout.fillWidth: true
                     maximumLineCount: 3
@@ -269,6 +270,7 @@ Variants {
                     text: model.body || ""
                     font.pointSize: Style.fontSizeM * scaling
                     color: Color.mOnSurface
+                    textFormat: Text.PlainText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     Layout.fillWidth: true
                     maximumLineCount: 5
@@ -326,7 +328,7 @@ Variants {
             NIconButton {
               icon: "close"
               tooltipText: "Close."
-              sizeRatio: 0.6
+              baseSize: Style.baseWidgetSize * 0.6
               anchors.top: parent.top
               anchors.topMargin: Style.marginM * scaling
               anchors.right: parent.right

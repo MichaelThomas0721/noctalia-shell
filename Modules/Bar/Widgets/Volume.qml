@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Modules.SettingsPanel
 import qs.Services
 import qs.Widgets
+import qs.Modules.Bar.Extras
 
 Item {
   id: root
@@ -71,10 +72,11 @@ Item {
     }
   }
 
-  NPill {
+  BarPill {
     id: pill
 
-    rightOpen: BarWidgetRegistry.getNPillDirection(root)
+    compact: (Settings.data.bar.density === "compact")
+    rightOpen: BarWidgetRegistry.getPillDirection(root)
     icon: getIcon()
     autoHide: false // Important to be false so we can hover as long as we want
     text: Math.floor(AudioService.volume * 100)
