@@ -38,10 +38,10 @@ ColumnLayout {
       if (exitCode === 0) {
         Settings.data.nightLight.enabled = true
         NightLightService.apply()
-        ToastService.showNotice("Night Light", "Enabled")
+        ToastService.showNotice("Night light", "Enabled")
       } else {
         Settings.data.nightLight.enabled = false
-        ToastService.showWarning("Night Light", "wlsunset not installed")
+        ToastService.showWarning("Night light", "wlsunset not installed")
       }
     }
 
@@ -52,8 +52,8 @@ ColumnLayout {
   spacing: Style.marginL * scaling
 
   NHeader {
-    label: "Monitor-specific configuration"
-    description: "Configure scaling and brightness settings individually for each connected display."
+    label: "Per-monitor settings"
+    description: "Adjust scaling and brightness for each display."
   }
 
   ColumnLayout {
@@ -89,7 +89,7 @@ ColumnLayout {
 
           NLabel {
             label: modelData.name || "Unknown"
-            description: `${modelData.model} - ${modelData.width}x${modelData.height} [x:${modelData.x} y:${modelData.y}]`
+            description: `${modelData.model} (${modelData.width}x${modelData.height})`
           }
 
           // Scale
@@ -125,7 +125,7 @@ ColumnLayout {
                 NIconButton {
                   icon: "refresh"
                   baseSize: Style.baseWidgetSize * 0.9
-                  tooltipText: "Reset scaling."
+                  tooltipText: "Reset scaling"
                   onClicked: ScalingService.setScreenScale(modelData, 1.0)
                   anchors.right: parent.right
                   anchors.verticalCenter: parent.verticalCenter
@@ -204,7 +204,7 @@ ColumnLayout {
 
       NSpinBox {
         Layout.fillWidth: true
-        label: "Brightness Step Size"
+        label: "Brightness step size"
         description: "Adjust the step size for brightness changes (scroll wheel and keyboard shortcuts)."
         minimum: 1
         maximum: 50
@@ -228,13 +228,13 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Night Light"
+      label: "Night light"
       description: "Reduce blue light emission to help you sleep better and reduce eye strain."
     }
   }
 
   NToggle {
-    label: "Enable Night Light"
+    label: "Enable night light"
     description: "Apply a warm color filter to reduce blue light emission."
     checked: Settings.data.nightLight.enabled
     onToggled: checked => {
@@ -245,7 +245,7 @@ ColumnLayout {
                    Settings.data.nightLight.enabled = false
                    Settings.data.nightLight.forced = false
                    NightLightService.apply()
-                   ToastService.showNotice("Night Light", "Disabled")
+                   ToastService.showNotice("Night light", "Disabled")
                  }
                }
   }
@@ -257,7 +257,7 @@ ColumnLayout {
 
     NLabel {
       label: "Color temperature"
-      description: "Choose two temperatures in Kelvin."
+      description: "Set the color warmth for nighttime and daytime."
     }
 
     RowLayout {
@@ -315,7 +315,7 @@ ColumnLayout {
   }
 
   NToggle {
-    label: "Automatic Scheduling"
+    label: "Automatic scheduling"
     description: `Based on the sunset and sunrise time in <i>${LocationService.stableName}</i> - recommended.`
     checked: Settings.data.nightLight.autoSchedule
     onToggled: checked => Settings.data.nightLight.autoSchedule = checked
@@ -332,14 +332,14 @@ ColumnLayout {
       spacing: Style.marginM * scaling
 
       NLabel {
-        label: "Manual Scheduling"
+        label: "Manual scheduling"
       }
 
       Item {// add a little more spacing
       }
 
       NText {
-        text: "Sunrise Time"
+        text: "Sunrise time"
         font.pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
       }
@@ -356,7 +356,7 @@ ColumnLayout {
       }
 
       NText {
-        text: "Sunset Time"
+        text: "Sunset time"
         font.pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
       }
@@ -373,7 +373,7 @@ ColumnLayout {
   // Force activation toggle
   NToggle {
     label: "Force activation"
-    description: "Immediately apply night temperature without scheduling or fade."
+    description: "Ignores the schedule and applies the night filter immediately."
     checked: Settings.data.nightLight.forced
     onToggled: checked => {
                  Settings.data.nightLight.forced = checked

@@ -21,6 +21,8 @@ NPanel {
 
   panelKeyboardFocus: true
 
+  draggable: true
+
   // Tabs enumeration, order is NOT relevant
   enum Tab {
     About,
@@ -34,23 +36,15 @@ NPanel {
     Launcher,
     Location,
     Network,
-    Notification,
+    Notifications,
     ScreenRecorder,
-    Wallpaper,
-    WallpaperSelector
+    Wallpaper
   }
 
   property int requestedTab: SettingsPanel.Tab.General
   property int currentTabIndex: 0
   property var tabsModel: []
   property var activeScrollView: null
-
-  Connections {
-    target: Settings.data.wallpaper
-    function onEnabledChanged() {
-      updateTabsModel()
-    }
-  }
 
   Component.onCompleted: {
     updateTabsModel()
@@ -93,10 +87,6 @@ NPanel {
     Tabs.WallpaperTab {}
   }
   Component {
-    id: wallpaperSelectorTab
-    Tabs.WallpaperSelectorTab {}
-  }
-  Component {
     id: screenRecorderTab
     Tabs.ScreenRecorderTab {}
   }
@@ -113,8 +103,8 @@ NPanel {
     Tabs.DockTab {}
   }
   Component {
-    id: notificationTab
-    Tabs.NotificationTab {}
+    id: notificationsTab
+    Tabs.NotificationsTab {}
   }
 
   // Order *DOES* matter
@@ -150,10 +140,10 @@ NPanel {
                      "icon": "settings-display",
                      "source": displayTab
                    }, {
-                     "id": SettingsPanel.Tab.Notification,
-                     "label": "Notification",
-                     "icon": "settings-notification",
-                     "source": notificationTab
+                     "id": SettingsPanel.Tab.Notifications,
+                     "label": "Notifications",
+                     "icon": "settings-notifications",
+                     "source": notificationsTab
                    }, {
                      "id": SettingsPanel.Tab.Network,
                      "label": "Network",
@@ -166,7 +156,7 @@ NPanel {
                      "source": locationTab
                    }, {
                      "id": SettingsPanel.Tab.ColorScheme,
-                     "label": "Color Scheme",
+                     "label": "Color scheme",
                      "icon": "settings-color-scheme",
                      "source": colorSchemeTab
                    }, {
@@ -174,34 +164,22 @@ NPanel {
                      "label": "Wallpaper",
                      "icon": "settings-wallpaper",
                      "source": wallpaperTab
+                   }, {
+                     "id": SettingsPanel.Tab.ScreenRecorder,
+                     "label": "Screen recorder",
+                     "icon": "settings-screen-recorder",
+                     "source": screenRecorderTab
+                   }, {
+                     "id": SettingsPanel.Tab.Hooks,
+                     "label": "Hooks",
+                     "icon": "settings-hooks",
+                     "source": hooksTab
+                   }, {
+                     "id": SettingsPanel.Tab.About,
+                     "label": "About",
+                     "icon": "settings-about",
+                     "source": aboutTab
                    }]
-
-    // Only add the Wallpaper Selector tab if the feature is enabled
-    if (Settings.data.wallpaper.enabled) {
-      newTabs.push({
-                     "id": SettingsPanel.Tab.WallpaperSelector,
-                     "label": "Wallpaper Selector",
-                     "icon": "settings-wallpaper-selector",
-                     "source": wallpaperSelectorTab
-                   })
-    }
-
-    newTabs.push({
-                   "id": SettingsPanel.Tab.ScreenRecorder,
-                   "label": "Screen Recorder",
-                   "icon": "settings-screen-recorder",
-                   "source": screenRecorderTab
-                 }, {
-                   "id": SettingsPanel.Tab.Hooks,
-                   "label": "Hooks",
-                   "icon": "settings-hooks",
-                   "source": hooksTab
-                 }, {
-                   "id": SettingsPanel.Tab.About,
-                   "label": "About",
-                   "icon": "settings-about",
-                   "source": aboutTab
-                 })
 
     root.tabsModel = newTabs // Assign the generated list to the model
   }
@@ -484,7 +462,7 @@ NPanel {
               // Close button
               NIconButton {
                 icon: "close"
-                tooltipText: "Close."
+                tooltipText: "Close"
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: root.close()
               }
