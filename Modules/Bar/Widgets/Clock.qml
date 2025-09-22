@@ -37,13 +37,12 @@ Rectangle {
   // Resolve settings: try user settings or defaults from BarWidgetRegistry
   readonly property bool usePrimaryColor: widgetSettings.usePrimaryColor !== undefined ? widgetSettings.usePrimaryColor : widgetMetadata.usePrimaryColor
   property bool useMonospacedFont: widgetSettings.useMonospacedFont !== undefined ? widgetSettings.useMonospacedFont : widgetMetadata.useMonospacedFont
-  readonly property string line1: widgetSettings.line1 !== undefined ? widgetSettings.line1 : widgetMetadata.line1
-  readonly property string line2: widgetSettings.line2 !== undefined ? widgetSettings.line2 : widgetMetadata.line2
-  readonly property string line3: widgetSettings.line3 !== undefined ? widgetSettings.line3 : widgetMetadata.line3
-  readonly property string line4: widgetSettings.line4 !== undefined ? widgetSettings.line4 : widgetMetadata.line4
+  readonly property string formatHorizontal: widgetSettings.formatHorizontal !== undefined ? widgetSettings.formatHorizontal : widgetMetadata.formatHorizontal
+  readonly property string formatVertical: widgetSettings.formatVertical !== undefined ? widgetSettings.formatVertical : widgetMetadata.formatVertical
 
-  implicitWidth: isBarVertical ? Math.round(Style.capsuleHeight * scaling) : Math.round(layout.implicitWidth + Style.marginM * 2 * scaling)
-  implicitHeight: isBarVertical ? Math.round(Style.capsuleHeight * 2.5 * scaling) : Math.round(Style.capsuleHeight * scaling) // Match BarPill
+  implicitWidth: isBarVertical ? Math.round(Style.capsuleHeight * scaling) : Math.round((isBarVertical ? verticalLoader.implicitWidth : horizontalLoader.implicitWidth) + Style.marginM * 2 * scaling)
+
+  implicitHeight: isBarVertical ? Math.round(verticalLoader.implicitHeight + Style.marginS * 2 * scaling) : Math.round(Style.capsuleHeight * scaling)
 
   radius: Math.round(Style.radiusS * scaling)
   color: Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent
@@ -52,59 +51,61 @@ Rectangle {
     id: clockContainer
     anchors.centerIn: parent
 
-    // anchors.margins: compact ? 0 : Style.marginXS * scaling
-    ColumnLayout {
-      id: layout
+    // Horizontal
+    Loader {
+      id: horizontalLoader
+      active: !isBarVertical
       anchors.centerIn: parent
-      spacing: isBarVertical ? -2 * scaling : -3 * scaling
-
-      NText {
-        visible: text !== ""
-        text: Qt.formatDateTime(now, line1.trim())
-        font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-        font.pointSize: isBarVertical ? Style.fontSizeS * scaling : Style.fontSizeS * scaling
-        font.weight: Style.fontWeightBold
-        color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
-        wrapMode: Text.WordWrap
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+      sourceComponent: ColumnLayout {
+        anchors.centerIn: parent
+        spacing: Settings.data.bar.showCapsule ? -4 * scaling : -2 * scaling
+        Repeater {
+          id: repeater
+          model: Qt.formatDateTime(now, formatHorizontal.trim()).split("\\n")
+          NText {
+            visible: text !== ""
+            text: modelData
+            font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
+            font.pointSize: {
+              if (repeater.model.length == 1) {
+                return Style.fontSizeS * scaling
+              } else {
+                return (index == 0) ? Style.fontSizeXS * scaling : Style.fontSizeXXS * scaling
+              }
+            }
+            font.weight: Style.fontWeightBold
+            color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
+            wrapMode: Text.WordWrap
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+          }
+        }
       }
+    }
 
-      NText {
-        visible: text !== ""
-        text: Qt.formatDateTime(now, line2.trim())
-        font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-        font.pointSize: isBarVertical ? Style.fontSizeS * scaling : Style.fontSizeXS * scaling
-        font.weight: Style.fontWeightBold
-        color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
-        wrapMode: Text.WordWrap
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-      }
-
-      NText {
-        visible: text !== "" && isBarVertical
-        text: Qt.formatDateTime(now, line3.trim())
-        font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-        font.pointSize: isBarVertical ? Style.fontSizeS * scaling : Style.fontSizeS * scaling
-        font.weight: Style.fontWeightBold
-        color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
-        wrapMode: Text.WordWrap
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-        Layout.topMargin: visible ? Style.marginXS * scaling : 0
-      }
-
-      NText {
-        visible: text !== "" && isBarVertical
-        text: Qt.formatDateTime(now, line4.trim())
-        font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-        font.pointSize: isBarVertical ? Style.fontSizeS * scaling : Style.fontSizeXS * scaling
-        font.weight: Style.fontWeightBold
-        color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
-        wrapMode: Text.WordWrap
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+    // Vertical
+    Loader {
+      id: verticalLoader
+      active: isBarVertical
+      anchors.centerIn: parent // Now this works without layout conflicts
+      sourceComponent: ColumnLayout {
+        anchors.centerIn: parent
+        spacing: -2 * scaling
+        Repeater {
+          model: Qt.formatDateTime(now, formatVertical.trim()).split(" ")
+          delegate: NText {
+            visible: text !== ""
+            text: modelData
+            font.family: useMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
+            font.pointSize: Style.fontSizeS * scaling
+            font.weight: Style.fontWeightBold
+            color: usePrimaryColor ? Color.mPrimary : Color.mOnSurface
+            wrapMode: Text.WordWrap
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+          }
+        }
       }
     }
   }
-
   NTooltip {
     id: tooltip
     text: "Open calendar"

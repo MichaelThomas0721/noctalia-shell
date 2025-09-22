@@ -55,10 +55,8 @@ Singleton {
                                     "allowUserSettings": true,
                                     "usePrimaryColor": true,
                                     "useMonospacedFont": true,
-                                    "line1": "HH:mm ddd, MMM dd",
-                                    "line2": "",
-                                    "line3": "",
-                                    "line4": ""
+                                    "formatHorizontal": "HH:mm ddd, MMM dd",
+                                    "formatVertical": "HH mm - dd MM"
                                   },
                                   "CustomButton": {
                                     "allowUserSettings": true,
@@ -105,7 +103,8 @@ Singleton {
                                   "SidePanelToggle": {
                                     "allowUserSettings": true,
                                     "useDistroLogo": false,
-                                    "icon": "noctalia"
+                                    "icon": "noctalia",
+                                    "customIconPath": ""
                                   },
                                   "Volume": {
                                     "allowUserSettings": true,
