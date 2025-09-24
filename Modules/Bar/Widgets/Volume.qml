@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import qs.Commons
-import qs.Modules.SettingsPanel
+import qs.Modules.Settings
 import qs.Services
 import qs.Widgets
 import qs.Modules.Bar.Extras
@@ -79,7 +79,7 @@ Item {
     rightOpen: BarService.getPillDirection(root)
     icon: getIcon()
     autoHide: false // Important to be false so we can hover as long as we want
-    text: Math.floor(AudioService.volume * 100)
+    text: Math.round(AudioService.volume * 100)
     suffix: "%"
     forceOpen: displayMode === "alwaysShow"
     forceClose: displayMode === "alwaysHide"

@@ -53,7 +53,8 @@ Singleton {
     // This should only be activated once when the settings structure has changed
     // Then it should be commented out again, regular users don't need to generate
     // default settings on every start
-    //generateDefaultSettings()
+    // TODO: automate this someday!
+    // generateDefaultSettings()
 
     // Patch-in the local default, resolved to user's home
     adapter.general.avatarImage = defaultAvatar
@@ -113,7 +114,7 @@ Singleton {
   JsonAdapter {
     id: adapter
 
-    property int settingsVersion: 4
+    property int settingsVersion: 5
 
     // bar
     property JsonObject bar: JsonObject {
@@ -142,7 +143,7 @@ Singleton {
             "id": "Workspace"
           }]
         property list<var> right: [{
-            "id": "ScreenRecorderIndicator"
+            "id": "ScreenRecorder"
           }, {
             "id": "Tray"
           }, {
@@ -162,7 +163,7 @@ Singleton {
           }, {
             "id": "Clock"
           }, {
-            "id": "SidePanelToggle"
+            "id": "ControlCenter"
           }]
       }
     }
@@ -248,15 +249,19 @@ Singleton {
       property bool doNotDisturb: false
       property list<string> monitors: []
       property string location: "top_right"
+      property bool alwaysOnTop: false
       property real lastSeenTs: 0
+      property bool respectExpireTimeout: false
       property int lowUrgencyDuration: 3
       property int normalUrgencyDuration: 8
       property int criticalUrgencyDuration: 15
+      property bool enableOSD: true
     }
 
     // audio
     property JsonObject audio: JsonObject {
       property int volumeStep: 5
+      property bool volumeOverdrive: false
       property int cavaFrameRate: 60
       property string visualizerType: "linear"
       property list<string> mprisBlacklist: []
@@ -379,15 +384,25 @@ Singleton {
     const sections = ["left", "center", "right"]
 
     // -----------------
-    // 1st. check our settings are not super old, when we only had the widget type as a plain string
+    // 1st. convert old widget id to new id
     for (var s = 0; s < sections.length; s++) {
       const sectionName = sections[s]
       for (var i = 0; i < adapter.bar.widgets[sectionName].length; i++) {
         var widget = adapter.bar.widgets[sectionName][i]
-        if (typeof widget === "string") {
-          adapter.bar.widgets[sectionName][i] = {
-            "id": widget
-          }
+
+        switch (widget.id) {
+        case "DarkModeToggle":
+          widget.id = "DarkMode"
+          break
+        case "PowerToggle":
+          widget.id = "SessionMenu"
+          break
+        case "ScreenRecorderIndicator":
+          widget.id = "ScreenRecorder"
+          break
+        case "SidePanelToggle":
+          widget.id = "ControlCenter"
+          break
         }
       }
     }
@@ -401,8 +416,8 @@ Singleton {
       for (var i = widgets.length - 1; i >= 0; i--) {
         var widget = widgets[i]
         if (!BarWidgetRegistry.hasWidget(widget.id)) {
-          widgets.splice(i, 1)
           Logger.warn(`Settings`, `Deleted invalid widget ${widget.id}`)
+          widgets.splice(i, 1)
         }
       }
     }
