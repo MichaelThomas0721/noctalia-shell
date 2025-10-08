@@ -11,10 +11,11 @@ Singleton {
   // Compositor detection
   property bool isHyprland: false
   property bool isNiri: false
+  property bool isSway: false
 
   // Generic workspace and window data
   property ListModel workspaces: ListModel {}
-  property var windows: []
+  property ListModel windows: ListModel {}
   property int focusedWindowIndex: -1
 
   // Generic events
@@ -31,14 +32,28 @@ Singleton {
 
   function detectCompositor() {
     const hyprlandSignature = Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE")
-    if (hyprlandSignature && hyprlandSignature.length > 0) {
-      isHyprland = true
-      isNiri = false
-      backendLoader.sourceComponent = hyprlandComponent
-    } else {
-      // Default to Niri
+    const niriSocket = Quickshell.env("NIRI_SOCKET")
+    const swaySock = Quickshell.env("SWAYSOCK")
+    if (niriSocket && niriSocket.length > 0) {
       isHyprland = false
       isNiri = true
+      isSway = false
+      backendLoader.sourceComponent = niriComponent
+    } else if (hyprlandSignature && hyprlandSignature.length > 0) {
+      isHyprland = true
+      isNiri = false
+      isSway = false
+      backendLoader.sourceComponent = hyprlandComponent
+    } else if (swaySock && swaySock.length > 0) {
+      isHyprland = false
+      isNiri = false
+      isSway = true
+      backendLoader.sourceComponent = swayComponent
+    } else {
+      // Always fallback to Niri
+      isHyprland = false
+      isNiri = true
+      isSway = false
       backendLoader.sourceComponent = niriComponent
     }
   }
@@ -70,6 +85,14 @@ Singleton {
     }
   }
 
+  // Sway backend component
+  Component {
+    id: swayComponent
+    SwayService {
+      id: swayBackend
+    }
+  }
+
   function setupBackendConnections() {
     if (!backend)
       return
@@ -82,10 +105,17 @@ Singleton {
                                        workspaceChanged()
                                      })
 
-    backend.activeWindowChanged.connect(activeWindowChanged)
+    backend.activeWindowChanged.connect(() => {
+                                          // Sync active window when it changes
+                                          // TODO: Avoid re-syncing all windows
+                                          syncWindows()
+                                          // Forward the signal
+                                          activeWindowChanged()
+                                        })
+
     backend.windowListChanged.connect(() => {
                                         // Sync windows when they change
-                                        windows = backend.windows
+                                        syncWindows()
                                         // Forward the signal
                                         windowListChanged()
                                       })
@@ -97,7 +127,7 @@ Singleton {
 
     // Initial sync
     syncWorkspaces()
-    windows = backend.windows
+    syncWindows()
     focusedWindowIndex = backend.focusedWindowIndex
   }
 
@@ -111,18 +141,36 @@ Singleton {
     workspacesChanged()
   }
 
-  // Get window title for focused window
+  function syncWindows() {
+    windows.clear()
+    const ws = backend.windows
+    for (var i = 0; i < ws.length; i++) {
+      windows.append(ws[i])
+    }
+    // Emit signal to notify listeners that workspace list has been updated
+    windowListChanged()
+  }
+
+  // Get focused window
+  function getFocusedWindow() {
+    if (focusedWindowIndex >= 0 && focusedWindowIndex < windows.count) {
+      return windows.get(focusedWindowIndex)
+    }
+    return null
+  }
+
+  // Get focused window title
   function getFocusedWindowTitle() {
-    if (focusedWindowIndex >= 0 && focusedWindowIndex < windows.length) {
-      return windows[focusedWindowIndex].title || ""
+    if (focusedWindowIndex >= 0 && focusedWindowIndex < windows.count) {
+      return windows.get(focusedWindowIndex).title || ""
     }
     return ""
   }
 
   // Generic workspace switching
-  function switchToWorkspace(workspaceId) {
+  function switchToWorkspace(workspace) {
     if (backend && backend.switchToWorkspace) {
-      backend.switchToWorkspace(workspaceId)
+      backend.switchToWorkspace(workspace)
     } else {
       Logger.warn("Compositor", "No backend available for workspace switching")
     }
@@ -139,12 +187,34 @@ Singleton {
     return null
   }
 
-  // Get focused window
-  function getFocusedWindow() {
-    if (focusedWindowIndex >= 0 && focusedWindowIndex < windows.length) {
-      return windows[focusedWindowIndex]
+  // Get active workspaces
+  function getActiveWorkspaces() {
+    const activeWorkspaces = []
+    for (var i = 0; i < workspaces.count; i++) {
+      const ws = workspaces.get(i)
+      if (ws.isActive) {
+        activeWorkspaces.push(ws)
+      }
     }
-    return null
+    return activeWorkspaces
+  }
+
+  // Set focused window
+  function focusWindow(window) {
+    if (backend && backend.focusWindow) {
+      backend.focusWindow(window)
+    } else {
+      Logger.warn("Compositor", "No backend available for window focus")
+    }
+  }
+
+  // Close window
+  function closeWindow(window) {
+    if (backend && backend.closeWindow) {
+      backend.closeWindow(window)
+    } else {
+      Logger.warn("Compositor", "No backend available for window closing")
+    }
   }
 
   // Session management
@@ -166,5 +236,17 @@ Singleton {
 
   function suspend() {
     Quickshell.execDetached(["systemctl", "suspend"])
+  }
+
+  function lockAndSuspend() {
+    try {
+      if (PanelService && PanelService.lockScreen && !PanelService.lockScreen.active) {
+        PanelService.lockScreen.active = true
+      }
+    } catch (e) {
+      Logger.warn("Compositor", "Failed to activate lock screen before suspend: " + e)
+    }
+    // Queue suspend to the next event loop cycle to allow lock UI to render
+    Qt.callLater(suspend)
   }
 }

@@ -30,13 +30,13 @@ NPanel {
 
         NIcon {
           icon: "bluetooth"
-          font.pointSize: Style.fontSizeXXL * scaling
+          pointSize: Style.fontSizeXXL * scaling
           color: Color.mPrimary
         }
 
         NText {
-          text: "Bluetooth"
-          font.pointSize: Style.fontSizeL * scaling
+          text: I18n.tr("bluetooth.panel.title")
+          pointSize: Style.fontSizeL * scaling
           font.weight: Style.fontWeightBold
           color: Color.mOnSurface
           Layout.fillWidth: true
@@ -44,15 +44,15 @@ NPanel {
 
         NToggle {
           id: bluetoothSwitch
-          checked: Settings.data.network.bluetoothEnabled
+          checked: BluetoothService.enabled
           onToggled: checked => BluetoothService.setBluetoothEnabled(checked)
           baseSize: Style.baseWidgetSize * 0.65 * scaling
         }
 
         NIconButton {
-          enabled: Settings.data.network.bluetoothEnabled
+          enabled: BluetoothService.enabled
           icon: BluetoothService.adapter && BluetoothService.adapter.discovering ? "stop" : "refresh"
-          tooltipText: "Refresh devices"
+          tooltipText: I18n.tr("tooltips.refresh-devices")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: {
             if (BluetoothService.adapter) {
@@ -63,7 +63,7 @@ NPanel {
 
         NIconButton {
           icon: "close"
-          tooltipText: "Close"
+          tooltipText: I18n.tr("tooltips.close")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: {
             root.close()
@@ -88,21 +88,21 @@ NPanel {
 
           NIcon {
             icon: "bluetooth-off"
-            font.pointSize: 64 * scaling
+            pointSize: 64 * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
-            text: "Bluetooth is disabled"
-            font.pointSize: Style.fontSizeL * scaling
+            text: I18n.tr("bluetooth.panel.disabled")
+            pointSize: Style.fontSizeL * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
-            text: "Enable Bluetooth to see available devices."
-            font.pointSize: Style.fontSizeS * scaling
+            text: I18n.tr("bluetooth.panel.enable-message")
+            pointSize: Style.fontSizeS * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
@@ -124,7 +124,7 @@ NPanel {
 
           // Connected devices
           BluetoothDevicesList {
-            label: "Connected devices"
+            label: I18n.tr("bluetooth.panel.connected-devices")
             property var items: {
               if (!BluetoothService.adapter || !Bluetooth.devices)
                 return []
@@ -138,8 +138,8 @@ NPanel {
 
           // Known devices
           BluetoothDevicesList {
-            label: "Known devices"
-            tooltipText: "Left click to connect. Right click to forget."
+            label: I18n.tr("bluetooth.panel.known-devices")
+            tooltipText: I18n.tr("tooltips.connect-disconnect-devices")
             property var items: {
               if (!BluetoothService.adapter || !Bluetooth.devices)
                 return []
@@ -153,7 +153,7 @@ NPanel {
 
           // Available devices
           BluetoothDevicesList {
-            label: "Available devices"
+            label: I18n.tr("bluetooth.panel.available-devices")
             property var items: {
               if (!BluetoothService.adapter || !Bluetooth.devices)
                 return []
@@ -186,7 +186,7 @@ NPanel {
 
               NIcon {
                 icon: "refresh"
-                font.pointSize: Style.fontSizeXXL * 1.5 * scaling
+                pointSize: Style.fontSizeXXL * 1.5 * scaling
                 color: Color.mPrimary
 
                 RotationAnimation on rotation {
@@ -199,15 +199,15 @@ NPanel {
               }
 
               NText {
-                text: "Scanning for devices..."
-                font.pointSize: Style.fontSizeL * scaling
+                text: I18n.tr("bluetooth.panel.scanning")
+                pointSize: Style.fontSizeL * scaling
                 color: Color.mOnSurface
               }
             }
 
             NText {
-              text: "Make sure your device is in pairing mode."
-              font.pointSize: Style.fontSizeM * scaling
+              text: I18n.tr("bluetooth.panel.pairing-mode")
+              pointSize: Style.fontSizeM * scaling
               color: Color.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }

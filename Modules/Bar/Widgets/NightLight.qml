@@ -11,7 +11,6 @@ import qs.Widgets
 NIconButton {
   id: root
 
-  property ShellScreen screen
   property real scaling: 1.0
 
   compact: (Settings.data.bar.density === "compact")
@@ -22,8 +21,15 @@ NIconButton {
   colorBorderHover: Color.transparent
 
   icon: Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "nightlight-forced" : "nightlight-on") : "nightlight-off"
-  tooltipText: `Night light is ${Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "forced." : "enabled.") : "disabled."}\nLeft click to cycle mode.\nRight click to access settings.`
+  tooltipText: Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? I18n.tr("tooltips.night-light-forced") : I18n.tr("tooltips.night-light-enabled")) : I18n.tr("tooltips.night-light-disabled")
+  tooltipDirection: BarService.getTooltipDirection()
   onClicked: {
+    // Check if wlsunset is available before enabling night light
+    if (!ProgramCheckerService.wlsunsetAvailable) {
+      ToastService.showWarning(I18n.tr("settings.display.night-light.section.label"), I18n.tr("toast.night-light.not-installed"))
+      return
+    }
+
     if (!Settings.data.nightLight.enabled) {
       Settings.data.nightLight.enabled = true
       Settings.data.nightLight.forced = false

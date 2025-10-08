@@ -9,18 +9,19 @@ import qs.Widgets
 
 ColumnLayout {
   id: root
-  spacing: Style.marginL * scaling
 
   property string specificFolderMonitorName: ""
 
+  spacing: Style.marginL * scaling
+
   NHeader {
-    label: "Wallpaper settings"
-    description: "Control how wallpapers are managed and displayed."
+    label: I18n.tr("settings.wallpaper.settings.section.label")
+    description: I18n.tr("settings.wallpaper.settings.section.description")
   }
 
   NToggle {
-    label: "Enable wallpaper management"
-    description: "Manage wallpapers with Noctalia. Uncheck if you prefer using another application."
+    label: I18n.tr("settings.wallpaper.settings.enable-management.label")
+    description: I18n.tr("settings.wallpaper.settings.enable-management.description")
     checked: Settings.data.wallpaper.enabled
     onToggled: checked => Settings.data.wallpaper.enabled = checked
     Layout.bottomMargin: Style.marginL * scaling
@@ -33,11 +34,11 @@ ColumnLayout {
 
     NTextInputButton {
       id: wallpaperPathInput
-      label: "Wallpaper folder"
-      description: "Path to your main wallpaper folder."
+      label: I18n.tr("settings.wallpaper.settings.folder.label")
+      description: I18n.tr("settings.wallpaper.settings.folder.description")
       text: Settings.data.wallpaper.directory
       buttonIcon: "folder-open"
-      buttonTooltip: "Browse for wallpaper folder"
+      buttonTooltip: I18n.tr("settings.wallpaper.settings.folder.tooltip")
       Layout.fillWidth: true
       onInputEditingFinished: Settings.data.wallpaper.directory = text
       onButtonClicked: mainFolderPicker.open()
@@ -45,8 +46,8 @@ ColumnLayout {
 
     // Monitor-specific directories
     NToggle {
-      label: "Monitor-specific directories"
-      description: "Set a different wallpaper folder for each monitor."
+      label: I18n.tr("settings.wallpaper.settings.monitor-specific.label")
+      description: I18n.tr("settings.wallpaper.settings.monitor-specific.description")
       checked: Settings.data.wallpaper.enableMultiMonitorDirectories
       onToggled: checked => Settings.data.wallpaper.enableMultiMonitorDirectories = checked
     }
@@ -77,13 +78,13 @@ ColumnLayout {
               text: (modelData.name || "Unknown")
               color: Color.mPrimary
               font.weight: Style.fontWeightBold
-              font.pointSize: Style.fontSizeM * scaling
+              pointSize: Style.fontSizeM * scaling
             }
 
             NTextInputButton {
               text: WallpaperService.getMonitorDirectory(modelData.name)
               buttonIcon: "folder-open"
-              buttonTooltip: "Browse for wallpaper folder"
+              buttonTooltip: I18n.tr("settings.wallpaper.settings.monitor-specific.tooltip")
               Layout.fillWidth: true
               onInputEditingFinished: WallpaperService.setMonitorDirectory(modelData.name, text)
               onButtonClicked: {
@@ -110,13 +111,13 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Look & feel"
+      label: I18n.tr("settings.wallpaper.look-feel.section.label")
     }
 
     // Fill Mode
     NComboBox {
-      label: "Fill mode"
-      description: "Select how the image should scale to match your monitor's resolution."
+      label: I18n.tr("settings.wallpaper.look-feel.fill-mode.label")
+      description: I18n.tr("settings.wallpaper.look-feel.fill-mode.description")
       model: WallpaperService.fillModeModel
       currentKey: Settings.data.wallpaper.fillMode
       onSelected: key => Settings.data.wallpaper.fillMode = key
@@ -124,8 +125,8 @@ ColumnLayout {
 
     RowLayout {
       NLabel {
-        label: "Fill color"
-        description: "Choose a fill color that may appear behind the wallpaper."
+        label: I18n.tr("settings.wallpaper.look-feel.fill-color.label")
+        description: I18n.tr("settings.wallpaper.look-feel.fill-color.description")
         Layout.alignment: Qt.AlignTop
       }
 
@@ -137,8 +138,8 @@ ColumnLayout {
 
     // Transition Type
     NComboBox {
-      label: "Transition type"
-      description: "Animation type when switching between wallpapers."
+      label: I18n.tr("settings.wallpaper.look-feel.transition-type.label")
+      description: I18n.tr("settings.wallpaper.look-feel.transition-type.description")
       model: WallpaperService.transitionsModel
       currentKey: Settings.data.wallpaper.transitionType
       onSelected: key => Settings.data.wallpaper.transitionType = key
@@ -147,8 +148,8 @@ ColumnLayout {
     // Transition Duration
     ColumnLayout {
       NLabel {
-        label: "Transition duration"
-        description: "Duration of transition animations in seconds."
+        label: I18n.tr("settings.wallpaper.look-feel.transition-duration.label")
+        description: I18n.tr("settings.wallpaper.look-feel.transition-duration.description")
       }
 
       NValueSlider {
@@ -165,8 +166,8 @@ ColumnLayout {
     // Edge Smoothness
     ColumnLayout {
       NLabel {
-        label: "Soften transition edge"
-        description: "Applies a soft, feathered effect to the edge of transitions."
+        label: I18n.tr("settings.wallpaper.look-feel.edge-smoothness.label")
+        description: I18n.tr("settings.wallpaper.look-feel.edge-smoothness.description")
       }
 
       NValueSlider {
@@ -193,13 +194,13 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Automation"
+      label: I18n.tr("settings.wallpaper.automation.section.label")
     }
 
     // Random Wallpaper
     NToggle {
-      label: "Random wallpaper"
-      description: "Schedule random wallpaper changes at regular intervals."
+      label: I18n.tr("settings.wallpaper.automation.random-wallpaper.label")
+      description: I18n.tr("settings.wallpaper.automation.random-wallpaper.description")
       checked: Settings.data.wallpaper.randomEnabled
       onToggled: checked => Settings.data.wallpaper.randomEnabled = checked
     }
@@ -209,8 +210,8 @@ ColumnLayout {
       visible: Settings.data.wallpaper.randomEnabled
       RowLayout {
         NLabel {
-          label: "Wallpaper interval"
-          description: "How often to change wallpapers automatically."
+          label: I18n.tr("settings.wallpaper.automation.interval.label")
+          description: I18n.tr("settings.wallpaper.automation.interval.description")
           Layout.fillWidth: true
         }
 
@@ -275,8 +276,8 @@ ColumnLayout {
         Layout.topMargin: Style.marginS * scaling
 
         NTextInput {
-          label: "Custom interval"
-          description: "Enter time as HH:MM (e.g., 01:30)."
+          label: I18n.tr("settings.wallpaper.automation.custom-interval.label")
+          description: I18n.tr("settings.wallpaper.automation.custom-interval.description")
           text: {
             const s = Settings.data.wallpaper.randomIntervalSec
             const h = Math.floor(s / 3600)
@@ -327,7 +328,7 @@ ColumnLayout {
       id: chipLabel
       anchors.centerIn: parent
       text: parent.label
-      font.pointSize: Style.fontSizeS * scaling
+      pointSize: Style.fontSizeS * scaling
       color: parent.selected ? Color.mOnPrimary : Color.mOnSurface
     }
   }
@@ -340,15 +341,25 @@ ColumnLayout {
 
   NFilePicker {
     id: mainFolderPicker
-    pickerType: "folder"
-    title: "Select wallpaper folder"
-    onAccepted: paths => Settings.data.wallpaper.directory = paths[0]
+    selectionMode: "folders"
+    title: I18n.tr("settings.wallpaper.settings.select-folder")
+    initialPath: Settings.data.wallpaper.directory || Quickshell.env("HOME") + "/Pictures"
+    onAccepted: paths => {
+                  if (paths.length > 0) {
+                    Settings.data.wallpaper.directory = paths[0]
+                  }
+                }
   }
 
   NFilePicker {
     id: monitorFolderPicker
-    pickerType: "folder"
-    title: "Select monitor wallpaper folder"
-    onAccepted: paths => WallpaperService.setMonitorDirectory(specificFolderMonitorName, paths[0])
+    selectionMode: "folders"
+    title: I18n.tr("settings.wallpaper.settings.select-monitor-folder")
+    initialPath: WallpaperService.getMonitorDirectory(specificFolderMonitorName) || Quickshell.env("HOME") + "/Pictures"
+    onAccepted: paths => {
+                  if (paths.length > 0) {
+                    WallpaperService.setMonitorDirectory(specificFolderMonitorName, paths[0])
+                  }
+                }
   }
 }

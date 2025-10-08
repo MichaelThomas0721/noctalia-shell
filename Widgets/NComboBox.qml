@@ -13,9 +13,7 @@ RowLayout {
 
   property string label: ""
   property string description: ""
-  property ListModel model: {
-
-  }
+  property var model
   property string currentKey: ""
   property string placeholder: ""
 
@@ -26,11 +24,31 @@ RowLayout {
   spacing: Style.marginL * scaling
   Layout.fillWidth: true
 
+  function itemCount() {
+    if (!root.model)
+      return 0
+    if (typeof root.model.count === 'number')
+      return root.model.count
+    if (Array.isArray(root.model))
+      return root.model.length
+    return 0
+  }
+
+  function getItem(index) {
+    if (!root.model)
+      return null
+    if (typeof root.model.get === 'function')
+      return root.model.get(index)
+    if (Array.isArray(root.model))
+      return root.model[index]
+    return null
+  }
+
   function findIndexByKey(key) {
-    for (var i = 0; i < root.model.count; i++) {
-      if (root.model.get(i).key === key) {
+    for (var i = 0; i < itemCount(); i++) {
+      var item = getItem(i)
+      if (item && item.key === key)
         return i
-      }
     }
     return -1
   }
@@ -48,7 +66,9 @@ RowLayout {
     model: model
     currentIndex: findIndexByKey(currentKey)
     onActivated: {
-      root.selected(model.get(combo.currentIndex).key)
+      var item = getItem(combo.currentIndex)
+      if (item && item.key !== undefined)
+        root.selected(item.key)
     }
 
     background: Rectangle {
@@ -69,18 +89,18 @@ RowLayout {
     contentItem: NText {
       leftPadding: Style.marginL * scaling
       rightPadding: combo.indicator.width + Style.marginL * scaling
-      font.pointSize: Style.fontSizeM * scaling
+      pointSize: Style.fontSizeM * scaling
       verticalAlignment: Text.AlignVCenter
       elide: Text.ElideRight
-      color: (combo.currentIndex >= 0 && combo.currentIndex < root.model.count) ? Color.mOnSurface : Color.mOnSurfaceVariant
-      text: (combo.currentIndex >= 0 && combo.currentIndex < root.model.count) ? root.model.get(combo.currentIndex).name : root.placeholder
+      color: (combo.currentIndex >= 0 && combo.currentIndex < itemCount()) ? Color.mOnSurface : Color.mOnSurfaceVariant
+      text: (combo.currentIndex >= 0 && combo.currentIndex < itemCount()) ? (getItem(combo.currentIndex) ? getItem(combo.currentIndex).name : root.placeholder) : root.placeholder
     }
 
     indicator: NIcon {
       x: combo.width - width - Style.marginM * scaling
       y: combo.topPadding + (combo.availableHeight - height) / 2
       icon: "caret-down"
-      font.pointSize: Style.fontSizeL * scaling
+      pointSize: Style.fontSizeL * scaling
     }
 
     popup: Popup {
@@ -115,9 +135,12 @@ RowLayout {
           }
 
           onClicked: {
-            root.selected(root.model.get(index).key)
-            combo.currentIndex = index
-            combo.popup.close()
+            var item = root.getItem(index)
+            if (item && item.key !== undefined) {
+              root.selected(item.key)
+              combo.currentIndex = index
+              combo.popup.close()
+            }
           }
 
           background: Rectangle {
@@ -132,8 +155,11 @@ RowLayout {
           }
 
           contentItem: NText {
-            text: name
-            font.pointSize: Style.fontSizeM * scaling
+            text: {
+              var item = root.getItem(index)
+              return item && item.name ? item.name : ""
+            }
+            pointSize: Style.fontSizeM * scaling
             color: highlighted ? Color.mOnTertiary : Color.mOnSurface
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight

@@ -38,10 +38,10 @@ ColumnLayout {
       if (exitCode === 0) {
         Settings.data.nightLight.enabled = true
         NightLightService.apply()
-        ToastService.showNotice("Night light", "Enabled")
+        ToastService.showNotice(I18n.tr("settings.display.night-light.section.label"), I18n.tr("toast.night-light.enabled"))
       } else {
         Settings.data.nightLight.enabled = false
-        ToastService.showWarning("Night light", "wlsunset not installed")
+        ToastService.showWarning(I18n.tr("settings.display.night-light.section.label"), I18n.tr("toast.night-light.not-installed"))
       }
     }
 
@@ -52,8 +52,8 @@ ColumnLayout {
   spacing: Style.marginL * scaling
 
   NHeader {
-    label: "Per-monitor settings"
-    description: "Adjust scaling and brightness for each display."
+    label: I18n.tr("settings.display.monitors.section.label")
+    description: I18n.tr("settings.display.monitors.section.description")
   }
 
   ColumnLayout {
@@ -90,7 +90,11 @@ ColumnLayout {
 
           NLabel {
             label: modelData.name || "Unknown"
-            description: `${modelData.model} (${modelData.width}x${modelData.height})`
+            description: I18n.tr("system.monitor-description", {
+                                   "model": modelData.model,
+                                   "width": modelData.width,
+                                   "height": modelData.height
+                                 })
           }
 
           // Scale
@@ -103,8 +107,9 @@ ColumnLayout {
               Layout.fillWidth: true
 
               NText {
-                text: "Scale"
-                Layout.preferredWidth: 80 * scaling
+                text: I18n.tr("settings.display.monitors.scale")
+                Layout.preferredWidth: 90 * scaling
+                Layout.alignment: Qt.AlignVCenter
               }
 
               NValueSlider {
@@ -114,22 +119,27 @@ ColumnLayout {
                 stepSize: 0.01
                 value: localScaling
                 onPressedChanged: (pressed, value) => ScalingService.setScreenScale(modelData, value)
-                text: `${Math.round(localScaling * 100)}%`
                 Layout.fillWidth: true
               }
 
-              // Reset button container
-              Item {
-                Layout.preferredWidth: 40 * scaling
-                Layout.preferredHeight: 30 * scaling
+              NText {
+                text: I18n.tr("system.scaling-percentage", {
+                                "percentage": Math.round(scaleSlider.value * 100)
+                              })
+                Layout.preferredWidth: 55 * scaling
+                horizontalAlignment: Text.AlignRight
+                Layout.alignment: Qt.AlignVCenter
+              }
 
+              Item {
+                Layout.preferredWidth: 30 * scaling
+                Layout.fillHeight: true
                 NIconButton {
                   icon: "refresh"
-                  baseSize: Style.baseWidgetSize * 0.9
-                  tooltipText: "Reset scaling"
+                  baseSize: Style.baseWidgetSize * 0.8
+                  tooltipText: I18n.tr("settings.display.monitors.reset-scaling")
                   onClicked: ScalingService.setScreenScale(modelData, 1.0)
-                  anchors.right: parent.right
-                  anchors.verticalCenter: parent.verticalCenter
+                  anchors.centerIn: parent
                 }
               }
             }
@@ -137,7 +147,7 @@ ColumnLayout {
 
           // Brightness
           ColumnLayout {
-            spacing: Style.marginL * scaling
+            spacing: Style.marginS * scaling
             Layout.fillWidth: true
             visible: brightnessMonitor !== undefined && brightnessMonitor !== null
 
@@ -146,33 +156,39 @@ ColumnLayout {
               spacing: Style.marginL * scaling
 
               NText {
-                text: "Brightness"
-                Layout.preferredWidth: 80 * scaling
+                text: I18n.tr("settings.display.monitors.brightness")
+                Layout.preferredWidth: 90 * scaling
+                Layout.alignment: Qt.AlignVCenter
               }
 
               NValueSlider {
-                Layout.fillWidth: true
+                id: brightnessSlider
                 from: 0
                 to: 1
                 value: brightnessMonitor ? brightnessMonitor.brightness : 0.5
                 stepSize: 0.01
+                onMoved: value => {
+                           if (brightnessMonitor.method === "internal") {
+                             brightnessMonitor.setBrightness(value)
+                           }
+                         }
                 onPressedChanged: (pressed, value) => brightnessMonitor.setBrightness(value)
-                text: brightnessMonitor ? Math.round(brightnessMonitor.brightness * 100) + "%" : "N/A"
+                Layout.fillWidth: true
               }
 
-              // Empty container to match scale row layout
-              Item {
-                Layout.preferredWidth: 40 * scaling
-                Layout.preferredHeight: 30 * scaling
+              NText {
+                text: brightnessMonitor ? Math.round(brightnessSlider.value * 100) + "%" : "N/A"
+                Layout.preferredWidth: 55 * scaling
+                horizontalAlignment: Text.AlignRight
+                Layout.alignment: Qt.AlignVCenter
+              }
 
-                // Method text positioned in the button area
-                NText {
-                  text: brightnessMonitor ? brightnessMonitor.method : ""
-                  font.pointSize: Style.fontSizeXS * scaling
-                  color: Color.mOnSurfaceVariant
-                  anchors.right: parent.right
-                  anchors.verticalCenter: parent.verticalCenter
-                  horizontalAlignment: Text.AlignRight
+              Item {
+                Layout.preferredWidth: 30 * scaling
+                Layout.fillHeight: true
+                NIcon {
+                  icon: brightnessMonitor.method == "internal" ? "device-laptop" : "device-desktop"
+                  anchors.centerIn: parent
                 }
               }
             }
@@ -180,40 +196,18 @@ ColumnLayout {
         }
       }
     }
-  }
 
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginXL * scaling
-    Layout.bottomMargin: Style.marginXL * scaling
-  }
-
-  // Brightness Section
-  ColumnLayout {
-    spacing: Style.marginS * scaling
-    Layout.fillWidth: true
-
-    NHeader {
-      label: "Brightness"
-      description: "Adjust brightness related settings."
-    }
-
-    // Brightness Step Section
-    ColumnLayout {
-      spacing: Style.marginS * scaling
+    // Brightness Step
+    NSpinBox {
       Layout.fillWidth: true
-
-      NSpinBox {
-        Layout.fillWidth: true
-        label: "Brightness step size"
-        description: "Adjust the step size for brightness changes (scroll wheel and keyboard shortcuts)."
-        minimum: 1
-        maximum: 50
-        value: Settings.data.brightness.brightnessStep
-        stepSize: 1
-        suffix: "%"
-        onValueChanged: Settings.data.brightness.brightnessStep = value
-      }
+      label: I18n.tr("settings.display.monitors.brightness-step.label")
+      description: I18n.tr("settings.display.monitors.brightness-step.description")
+      minimum: 1
+      maximum: 50
+      value: Settings.data.brightness.brightnessStep
+      stepSize: 1
+      suffix: "%"
+      onValueChanged: Settings.data.brightness.brightnessStep = value
     }
   }
 
@@ -229,14 +223,14 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Night light"
-      description: "Reduce blue light emission to help you sleep better and reduce eye strain."
+      label: I18n.tr("settings.display.night-light.section.label")
+      description: I18n.tr("settings.display.night-light.section.description")
     }
   }
 
   NToggle {
-    label: "Enable night light"
-    description: "Apply a warm color filter to reduce blue light emission."
+    label: I18n.tr("settings.display.night-light.enable.label")
+    description: I18n.tr("settings.display.night-light.enable.description")
     checked: Settings.data.nightLight.enabled
     onToggled: checked => {
                  if (checked) {
@@ -246,7 +240,7 @@ ColumnLayout {
                    Settings.data.nightLight.enabled = false
                    Settings.data.nightLight.forced = false
                    NightLightService.apply()
-                   ToastService.showNotice("Night light", "Disabled")
+                   ToastService.showNotice(I18n.tr("settings.display.night-light.section.label"), I18n.tr("toast.night-light.disabled"))
                  }
                }
   }
@@ -257,8 +251,8 @@ ColumnLayout {
     Layout.alignment: Qt.AlignVCenter
 
     NLabel {
-      label: "Color temperature"
-      description: "Set the color warmth for nighttime and daytime."
+      label: I18n.tr("settings.display.night-light.temperature.label")
+      description: I18n.tr("settings.display.night-light.temperature.description")
     }
 
     RowLayout {
@@ -269,8 +263,8 @@ ColumnLayout {
       Layout.alignment: Qt.AlignVCenter
 
       NText {
-        text: "Night"
-        font.pointSize: Style.fontSizeM * scaling
+        text: I18n.tr("settings.display.night-light.temperature.night")
+        pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
         Layout.alignment: Qt.AlignVCenter
       }
@@ -291,8 +285,8 @@ ColumnLayout {
       }
 
       NText {
-        text: "Day"
-        font.pointSize: Style.fontSizeM * scaling
+        text: I18n.tr("settings.display.night-light.temperature.day")
+        pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
         Layout.alignment: Qt.AlignVCenter
       }
@@ -314,8 +308,10 @@ ColumnLayout {
   }
 
   NToggle {
-    label: "Automatic scheduling"
-    description: `Based on the sunset and sunrise time in <i>${LocationService.stableName}</i> - recommended.`
+    label: I18n.tr("settings.display.night-light.auto-schedule.label")
+    description: I18n.tr("settings.display.night-light.auto-schedule.description", {
+                           "location": LocationService.stableName
+                         })
     checked: Settings.data.nightLight.autoSchedule
     onToggled: checked => Settings.data.nightLight.autoSchedule = checked
     visible: Settings.data.nightLight.enabled
@@ -327,8 +323,8 @@ ColumnLayout {
     visible: Settings.data.nightLight.enabled && !Settings.data.nightLight.autoSchedule && !Settings.data.nightLight.forced
 
     NLabel {
-      label: "Manual scheduling"
-      description: "Set custom times for sunrise and sunset."
+      label: I18n.tr("settings.display.night-light.manual-schedule.label")
+      description: I18n.tr("settings.display.night-light.manual-schedule.description")
     }
 
     RowLayout {
@@ -336,15 +332,15 @@ ColumnLayout {
       spacing: Style.marginS * scaling
 
       NText {
-        text: "Sunrise time"
-        font.pointSize: Style.fontSizeM * scaling
+        text: I18n.tr("settings.display.night-light.manual-schedule.sunrise")
+        pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
       }
 
       NComboBox {
         model: timeOptions
         currentKey: Settings.data.nightLight.manualSunrise
-        placeholder: "Select start time"
+        placeholder: I18n.tr("settings.display.night-light.manual-schedule.select-start")
         onSelected: key => Settings.data.nightLight.manualSunrise = key
         minimumWidth: 120 * scaling
       }
@@ -354,15 +350,15 @@ ColumnLayout {
       }
 
       NText {
-        text: "Sunset time"
-        font.pointSize: Style.fontSizeM * scaling
+        text: I18n.tr("settings.display.night-light.manual-schedule.sunset")
+        pointSize: Style.fontSizeM * scaling
         color: Color.mOnSurfaceVariant
       }
 
       NComboBox {
         model: timeOptions
         currentKey: Settings.data.nightLight.manualSunset
-        placeholder: "Select stop time"
+        placeholder: I18n.tr("settings.display.night-light.manual-schedule.select-stop")
         onSelected: key => Settings.data.nightLight.manualSunset = key
         minimumWidth: 120 * scaling
       }
@@ -371,8 +367,8 @@ ColumnLayout {
 
   // Force activation toggle
   NToggle {
-    label: "Force activation"
-    description: "Ignores the schedule and applies the night filter immediately."
+    label: I18n.tr("settings.display.night-light.force-activation.label")
+    description: I18n.tr("settings.display.night-light.force-activation.description")
     checked: Settings.data.nightLight.forced
     onToggled: checked => {
                  Settings.data.nightLight.forced = checked

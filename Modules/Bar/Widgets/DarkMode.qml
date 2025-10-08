@@ -6,11 +6,11 @@ import qs.Services
 NIconButton {
   id: root
 
-  property ShellScreen screen
   property real scaling: 1.0
 
   icon: "dark-mode"
-  tooltipText: `Switch to ${Settings.data.colorSchemes.darkMode ? "light" : "dark"} mode`
+  tooltipText: Settings.data.colorSchemes.darkMode ? I18n.tr("tooltips.switch-to-light-mode") : I18n.tr("tooltips.switch-to-dark-mode")
+  tooltipDirection: BarService.getTooltipDirection()
   compact: (Settings.data.bar.density === "compact")
   baseSize: Style.capsuleHeight
   colorBg: Settings.data.colorSchemes.darkMode ? (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent) : Color.mPrimary

@@ -70,7 +70,7 @@ NBox {
 
       NText {
         text: sectionName + " Section"
-        font.pointSize: Style.fontSizeL * scaling
+        pointSize: Style.fontSizeL * scaling
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
         Layout.alignment: Qt.AlignVCenter
@@ -79,27 +79,39 @@ NBox {
       Item {
         Layout.fillWidth: true
       }
-      NComboBox {
+      NSearchableComboBox {
         id: comboBox
         model: availableWidgets
         label: ""
         description: ""
-        placeholder: "Select a widget to add..."
+        placeholder: I18n.tr("bar.widget-settings.section-editor.placeholder")
+        searchPlaceholder: I18n.tr("bar.widget-settings.section-editor.search-placeholder")
         onSelected: key => comboBox.currentKey = key
         popupHeight: 340 * scaling
+        minimumWidth: 200 * scaling
 
         Layout.alignment: Qt.AlignVCenter
+
+        // Re-filter when the model count changes (when widgets are loaded)
+        Connections {
+          target: availableWidgets
+          function onCountChanged() {
+            // Trigger a re-filter by clearing and re-setting the search text
+            var currentSearch = comboBox.searchText
+            comboBox.searchText = ""
+            comboBox.searchText = currentSearch
+          }
+        }
       }
 
       NIconButton {
         icon: "add"
-
         colorBg: Color.mPrimary
         colorFg: Color.mOnPrimary
         colorBgHover: Color.mSecondary
         colorFgHover: Color.mOnSecondary
         enabled: comboBox.currentKey !== ""
-        tooltipText: "Add widget"
+        tooltipText: I18n.tr("tooltips.add-widget")
         Layout.alignment: Qt.AlignVCenter
         Layout.leftMargin: Style.marginS * scaling
         onClicked: {
@@ -166,17 +178,17 @@ NBox {
               parent: Overlay.overlay
               width: 240 * scaling
               model: [{
-                  "label": "Move to left section",
+                  "label": I18n.tr("tooltips.move-to-left-section"),
                   "action": "left",
                   "icon": "arrow-bar-to-left",
                   "visible": root.sectionId !== "left"
                 }, {
-                  "label": "Move to center section",
+                  "label": I18n.tr("tooltips.move-to-center-section"),
                   "action": "center",
                   "icon": "layout-columns",
                   "visible": root.sectionId !== "center"
                 }, {
-                  "label": "Move to right section",
+                  "label": I18n.tr("tooltips.move-to-right-section"),
                   "action": "right",
                   "icon": "arrow-bar-to-right",
                   "visible": root.sectionId !== "right"
@@ -212,7 +224,7 @@ NBox {
 
               NText {
                 text: modelData.id
-                font.pointSize: Style.fontSizeS * scaling
+                pointSize: Style.fontSizeS * scaling
                 color: root.getWidgetColor(modelData)[1]
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
@@ -227,7 +239,7 @@ NBox {
                   active: BarWidgetRegistry.widgetHasUserSettings(modelData.id)
                   sourceComponent: NIconButton {
                     icon: "settings"
-                    tooltipText: "Widget settings"
+                    tooltipText: I18n.tr("tooltips.widget-settings")
                     baseSize: miniButtonSize
                     colorBorder: Qt.alpha(Color.mOutline, Style.opacityLight)
                     colorBg: Color.mOnSurface
@@ -268,7 +280,7 @@ NBox {
 
                 NIconButton {
                   icon: "close"
-                  tooltipText: "Remove widget"
+                  tooltipText: I18n.tr("tooltips.remove-widget")
                   baseSize: miniButtonSize
                   colorBorder: Qt.alpha(Color.mOutline, Style.opacityLight)
                   colorBg: Color.mOnSurface
@@ -299,10 +311,10 @@ NBox {
         z: 2000
         clip: false // Ensure ghost isn't clipped
 
-        Text {
+        NText {
           id: ghostText
           anchors.centerIn: parent
-          font.pointSize: Style.fontSizeS * scaling
+          pointSize: Style.fontSizeS * scaling
           color: Color.mOnPrimary
         }
       }

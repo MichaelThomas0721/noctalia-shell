@@ -10,8 +10,8 @@ ColumnLayout {
   id: root
 
   NHeader {
-    label: "Profile"
-    description: "Edit your user details and avatar."
+    label: I18n.tr("settings.general.profile.section.label")
+    description: I18n.tr("settings.general.profile.section.description")
   }
 
   // Profile section
@@ -31,26 +31,32 @@ ColumnLayout {
     }
 
     NTextInputButton {
-      label: `${Quickshell.env("USER") || "user"}'s profile picture`
-      description: "Your profile picture that appears throughout the interface."
+      label: I18n.tr("settings.general.profile.picture.label", {
+                       "user": Quickshell.env("USER" || "User")
+                     })
+      description: I18n.tr("settings.general.profile.picture.description")
       text: Settings.data.general.avatarImage
-      placeholderText: "/home/user/.face"
+      placeholderText: I18n.tr("placeholders.profile-picture-path")
       buttonIcon: "photo"
       buttonTooltip: "Browse for avatar image"
       onInputEditingFinished: Settings.data.general.avatarImage = text
       onButtonClicked: {
-        filePicker.open()
+        avatarPicker.openFilePicker()
       }
     }
   }
 
   NFilePicker {
-    id: filePicker
-    pickerType: "file"
-    title: "Select avatar image"
+    id: avatarPicker
+    title: I18n.tr("settings.general.profile.select-avatar")
+    selectionMode: "files"
     initialPath: Settings.data.general.avatarImage.substr(0, Settings.data.general.avatarImage.lastIndexOf("/")) || Quickshell.env("HOME")
-    nameFilters: ["Image files (*.jpg *.jpeg *.png *.gif *.pnm *.bmp *.face)", "All files (*)"]
-    onAccepted: paths => Settings.data.general.avatarImage = paths[0]
+    nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.pnm", "*.bmp"]
+    onAccepted: paths => {
+                  if (paths.length > 0) {
+                    Settings.data.general.avatarImage = paths[0]
+                  }
+                }
   }
 
   NDivider {
@@ -65,15 +71,22 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "User interface"
-      description: "Customize the look, feel, and behavior of the interface."
+      label: I18n.tr("settings.general.ui.section.label")
+      description: I18n.tr("settings.general.ui.section.description")
     }
 
     NToggle {
-      label: "Dim desktop"
-      description: "Dim the desktop when panels or menus are open."
+      label: I18n.tr("settings.general.ui.dim-desktop.label")
+      description: I18n.tr("settings.general.ui.dim-desktop.description")
       checked: Settings.data.general.dimDesktop
       onToggled: checked => Settings.data.general.dimDesktop = checked
+    }
+
+    NToggle {
+      label: I18n.tr("settings.general.ui.tooltips.label")
+      description: I18n.tr("settings.general.ui.tooltips.description")
+      checked: Settings.data.ui.tooltipsEnabled
+      onToggled: checked => Settings.data.ui.tooltipsEnabled = checked
     }
 
     ColumnLayout {
@@ -81,8 +94,8 @@ ColumnLayout {
       Layout.fillWidth: true
 
       NLabel {
-        label: "Border radius"
-        description: "Controls the corner roundness of windows, buttons, and other elements."
+        label: I18n.tr("settings.general.ui.border-radius.label")
+        description: I18n.tr("settings.general.ui.border-radius.description")
       }
 
       NValueSlider {
@@ -98,22 +111,35 @@ ColumnLayout {
 
     // Animation Speed
     ColumnLayout {
-      spacing: Style.marginXXS * scaling
+      spacing: Style.marginL * scaling
       Layout.fillWidth: true
 
-      NLabel {
-        label: "Animation speed"
-        description: "Adjust global animation speed."
+      NToggle {
+        label: I18n.tr("settings.general.ui.animation-disable.label")
+        description: I18n.tr("settings.general.ui.animation-disable.description")
+        checked: Settings.data.general.animationDisabled
+        onToggled: checked => Settings.data.general.animationDisabled = checked
       }
 
-      NValueSlider {
+      ColumnLayout {
+        spacing: Style.marginXXS * scaling
         Layout.fillWidth: true
-        from: 0.1
-        to: 2.0
-        stepSize: 0.01
-        value: Settings.data.general.animationSpeed
-        onMoved: value => Settings.data.general.animationSpeed = value
-        text: Math.round(Settings.data.general.animationSpeed * 100) + "%"
+        visible: !Settings.data.general.animationDisabled
+
+        NLabel {
+          label: I18n.tr("settings.general.ui.animation-speed.label")
+          description: I18n.tr("settings.general.ui.animation-speed.description")
+        }
+
+        NValueSlider {
+          Layout.fillWidth: true
+          from: 0.1
+          to: 2.0
+          stepSize: 0.01
+          value: Settings.data.general.animationSpeed
+          onMoved: value => Settings.data.general.animationSpeed = value
+          text: Math.round(Settings.data.general.animationSpeed * 100) + "%"
+        }
       }
     }
   }
@@ -130,20 +156,20 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Screen corners"
-      description: "Customize screen corner rounding and visual effects."
+      label: I18n.tr("settings.general.screen-corners.section.label")
+      description: I18n.tr("settings.general.screen-corners.section.description")
     }
 
     NToggle {
-      label: "Show screen corners"
-      description: "Display rounded corners on the edge of the screen."
+      label: I18n.tr("settings.general.screen-corners.show-corners.label")
+      description: I18n.tr("settings.general.screen-corners.show-corners.description")
       checked: Settings.data.general.showScreenCorners
       onToggled: checked => Settings.data.general.showScreenCorners = checked
     }
 
     NToggle {
-      label: "Solid black corners"
-      description: "Use solid black instead of the bar background color."
+      label: I18n.tr("settings.general.screen-corners.solid-black.label")
+      description: I18n.tr("settings.general.screen-corners.solid-black.description")
       checked: Settings.data.general.forceBlackScreenCorners
       onToggled: checked => Settings.data.general.forceBlackScreenCorners = checked
     }
@@ -153,8 +179,8 @@ ColumnLayout {
       Layout.fillWidth: true
 
       NLabel {
-        label: "Screen corners radius"
-        description: "Adjust the rounded corners of the screen."
+        label: I18n.tr("settings.general.screen-corners.radius.label")
+        description: I18n.tr("settings.general.screen-corners.radius.description")
       }
 
       NValueSlider {
@@ -168,6 +194,57 @@ ColumnLayout {
       }
     }
   }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginXL * scaling
+    Layout.bottomMargin: Style.marginXL * scaling
+  }
+
+  // Control Center
+  ColumnLayout {
+    spacing: Style.marginL * scaling
+    Layout.fillWidth: true
+
+    NHeader {
+      label: I18n.tr("settings.general.control-center.section.label")
+      description: I18n.tr("settings.general.control-center.section.description")
+    }
+
+    NComboBox {
+      id: controlCenterPosition
+      label: I18n.tr("settings.general.control-center.position.label")
+      description: I18n.tr("settings.general.control-center.position.description")
+      Layout.fillWidth: true
+      model: [{
+          "key": "close_to_bar_button",
+          "name": I18n.tr("options.control-center.position.close_to_bar_button")
+        }, {
+          "key": "top_left",
+          "name": I18n.tr("options.control-center.position.top_left")
+        }, {
+          "key": "top_right",
+          "name": I18n.tr("options.control-center.position.top_right")
+        }, {
+          "key": "bottom_left",
+          "name": I18n.tr("options.control-center.position.bottom_left")
+        }, {
+          "key": "bottom_right",
+          "name": I18n.tr("options.control-center.position.bottom_right")
+        }, {
+          "key": "bottom_center",
+          "name": I18n.tr("options.control-center.position.bottom_center")
+        }, {
+          "key": "top_center",
+          "name": I18n.tr("options.control-center.position.top_center")
+        }]
+      currentKey: Settings.data.controlCenter.position
+      onSelected: function (key) {
+        Settings.data.controlCenter.position = key
+      }
+    }
+  }
+
   NDivider {
     Layout.fillWidth: true
     Layout.topMargin: Style.marginXL * scaling
@@ -180,8 +257,8 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Fonts"
-      description: "Choose the fonts used throughout the interface."
+      label: I18n.tr("settings.general.fonts.section.label")
+      description: I18n.tr("settings.general.fonts.section.description")
     }
 
     // Font configuration section
@@ -190,12 +267,12 @@ ColumnLayout {
       Layout.fillWidth: true
 
       NSearchableComboBox {
-        label: "Default font"
-        description: "Main font used throughout the interface."
+        label: I18n.tr("settings.general.fonts.default.label")
+        description: I18n.tr("settings.general.fonts.default.description")
         model: FontService.availableFonts
         currentKey: Settings.data.ui.fontDefault
-        placeholder: "Select default font..."
-        searchPlaceholder: "Search fonts..."
+        placeholder: I18n.tr("settings.general.fonts.default.placeholder")
+        searchPlaceholder: I18n.tr("settings.general.fonts.default.search-placeholder")
         popupHeight: 420 * scaling
         minimumWidth: 300 * scaling
         onSelected: function (key) {
@@ -204,12 +281,12 @@ ColumnLayout {
       }
 
       NSearchableComboBox {
-        label: "Monospaced font"
-        description: "Monospaced font used for numbers and stats display."
+        label: I18n.tr("settings.general.fonts.monospace.label")
+        description: I18n.tr("settings.general.fonts.monospace.description")
         model: FontService.monospaceFonts
         currentKey: Settings.data.ui.fontFixed
-        placeholder: "Select monospace font..."
-        searchPlaceholder: "Search monospace fonts..."
+        placeholder: I18n.tr("settings.general.fonts.monospace.placeholder")
+        searchPlaceholder: I18n.tr("settings.general.fonts.monospace.search-placeholder")
         popupHeight: 320 * scaling
         minimumWidth: 300 * scaling
         onSelected: function (key) {
@@ -217,25 +294,79 @@ ColumnLayout {
         }
       }
 
-      NSearchableComboBox {
-        label: "Accent font"
-        description: "Large font used for prominent displays."
-        model: FontService.displayFonts
-        currentKey: Settings.data.ui.fontBillboard
-        placeholder: "Select display font..."
-        searchPlaceholder: "Search display fonts..."
-        popupHeight: 320 * scaling
-        minimumWidth: 300 * scaling
-        onSelected: function (key) {
-          Settings.data.ui.fontBillboard = key
+      ColumnLayout {
+        NLabel {
+          label: I18n.tr("settings.general.fonts.default.scale.label")
+          description: I18n.tr("settings.general.fonts.default.scale.description")
+        }
+
+        RowLayout {
+          spacing: Style.marginL * scaling
+          Layout.fillWidth: true
+
+          NValueSlider {
+            Layout.fillWidth: true
+            from: 0.75
+            to: 1.25
+            stepSize: 0.01
+            value: Settings.data.ui.fontDefaultScale
+            onMoved: value => Settings.data.ui.fontDefaultScale = value
+            text: Math.floor(Settings.data.ui.fontDefaultScale * 100) + "%"
+          }
+
+          // Reset button container
+          Item {
+            Layout.preferredWidth: 30 * scaling
+            Layout.preferredHeight: 30 * scaling
+
+            NIconButton {
+              icon: "refresh"
+              baseSize: Style.baseWidgetSize * 0.8
+              tooltipText: I18n.tr("settings.general.fonts.reset-scaling")
+              onClicked: Settings.data.ui.fontDefaultScale = 1.0
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+            }
+          }
+        }
+      }
+
+      ColumnLayout {
+        NLabel {
+          label: I18n.tr("settings.general.fonts.monospace.scale.label")
+          description: I18n.tr("settings.general.fonts.monospace.scale.description")
+        }
+
+        RowLayout {
+          spacing: Style.marginL * scaling
+          Layout.fillWidth: true
+
+          NValueSlider {
+            Layout.fillWidth: true
+            from: 0.75
+            to: 1.25
+            stepSize: 0.01
+            value: Settings.data.ui.fontFixedScale
+            onMoved: value => Settings.data.ui.fontFixedScale = value
+            text: Math.floor(Settings.data.ui.fontFixedScale * 100) + "%"
+          }
+
+          // Reset button container
+          Item {
+            Layout.preferredWidth: 30 * scaling
+            Layout.preferredHeight: 30 * scaling
+
+            NIconButton {
+              icon: "refresh"
+              baseSize: Style.baseWidgetSize * 0.8
+              tooltipText: I18n.tr("settings.general.fonts.reset-scaling")
+              onClicked: Settings.data.ui.fontFixedScale = 1.0
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+            }
+          }
         }
       }
     }
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginXL * scaling
-    Layout.bottomMargin: Style.marginXL * scaling
   }
 }

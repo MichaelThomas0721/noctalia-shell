@@ -89,6 +89,7 @@ Item {
 
   BarPill {
     id: pill
+
     rightOpen: BarService.getPillDirection(root)
     icon: getIcon()
     compact: (Settings.data.bar.density === "compact")
@@ -97,7 +98,9 @@ Item {
     suffix: "%"
     forceOpen: displayMode === "alwaysShow"
     forceClose: displayMode === "alwaysHide"
-    tooltipText: "Microphone volume at " + Math.round(AudioService.inputVolume * 100) + "%\nLeft click to toggle mute. Right click for settings.\nScroll to modify volume."
+    tooltipText: I18n.tr("tooltips.microphone-volume-at", {
+                           "volume": Math.round(AudioService.inputVolume * 100)
+                         })
 
     onWheel: function (delta) {
       wheelAccumulator += delta

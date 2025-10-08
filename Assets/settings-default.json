@@ -1,5 +1,5 @@
 {
-  "settingsVersion": 5,
+  "settingsVersion": 15,
   "bar": {
     "position": "top",
     "backgroundOpacity": 1,
@@ -52,9 +52,6 @@
           "id": "Brightness"
         },
         {
-          "id": "NightLight"
-        },
-        {
           "id": "Clock"
         },
         {
@@ -70,7 +67,8 @@
     "forceBlackScreenCorners": false,
     "radiusRatio": 1,
     "screenRadiusRatio": 1,
-    "animationSpeed": 1
+    "animationSpeed": 1,
+    "animationDisabled": false
   },
   "location": {
     "name": "Tokyo",
@@ -94,6 +92,7 @@
     "directory": "",
     "enableMultiMonitorDirectories": false,
     "setWallpaperOnAllMonitors": true,
+    "defaultWallpaper": "",
     "fillMode": "crop",
     "fillColor": "#000000",
     "randomEnabled": false,
@@ -109,19 +108,22 @@
     "backgroundOpacity": 1,
     "pinnedExecs": [],
     "useApp2Unit": false,
-    "sortByMostUsed": true
+    "sortByMostUsed": true,
+    "terminalCommand": "xterm -e"
+  },
+  "controlCenter": {
+    "position": "close_to_bar_button"
   },
   "dock": {
-    "autoHide": false,
-    "exclusive": false,
+    "displayMode": "always_visible",
     "backgroundOpacity": 1,
     "floatingRatio": 1,
+    "onlySameOutput": true,
     "monitors": [],
     "pinnedApps": []
   },
   "network": {
-    "wifiEnabled": true,
-    "bluetoothEnabled": true
+    "wifiEnabled": true
   },
   "notifications": {
     "doNotDisturb": false,
@@ -132,8 +134,13 @@
     "respectExpireTimeout": false,
     "lowUrgencyDuration": 3,
     "normalUrgencyDuration": 8,
-    "criticalUrgencyDuration": 15,
-    "enableOSD": true
+    "criticalUrgencyDuration": 15
+  },
+  "osd": {
+    "enabled": true,
+    "location": "top_right",
+    "monitors": [],
+    "autoHideMs": 2000
   },
   "audio": {
     "volumeStep": 5,
@@ -146,9 +153,11 @@
   "ui": {
     "fontDefault": "Roboto",
     "fontFixed": "DejaVu Sans Mono",
-    "fontBillboard": "Inter",
+    "fontDefaultScale": 1,
+    "fontFixedScale": 1,
     "monitorsScaling": [],
-    "idleInhibitorEnabled": false
+    "idleInhibitorEnabled": false,
+    "tooltipsEnabled": true
   },
   "brightness": {
     "brightnessStep": 5
@@ -156,13 +165,13 @@
   "colorSchemes": {
     "useWallpaperColors": false,
     "predefinedScheme": "Noctalia (default)",
-    "darkMode": true
+    "darkMode": true,
+    "matugenSchemeType": "scheme-fruit-salad",
+    "generateTemplatesForPredefined": true
   },
-  "matugen": {
-    "gtk4": false,
-    "gtk3": false,
-    "qt6": false,
-    "qt5": false,
+  "templates": {
+    "gtk": false,
+    "qt": false,
     "kitty": false,
     "ghostty": false,
     "foot": false,

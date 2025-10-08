@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import qs.Modules.Settings.Tabs as Tabs
+import qs.Modules.Settings.Tabs
 import qs.Commons
 import qs.Services
 import qs.Widgets
@@ -29,6 +29,7 @@ NPanel {
     Audio,
     Bar,
     ColorScheme,
+    OSD,
     Display,
     Dock,
     General,
@@ -52,131 +53,140 @@ NPanel {
 
   Component {
     id: generalTab
-    Tabs.GeneralTab {}
+    GeneralTab {}
   }
   Component {
     id: launcherTab
-    Tabs.LauncherTab {}
+    LauncherTab {}
   }
   Component {
     id: barTab
-    Tabs.BarTab {}
+    BarTab {}
   }
   Component {
     id: audioTab
-    Tabs.AudioTab {}
+    AudioTab {}
   }
   Component {
     id: displayTab
-    Tabs.DisplayTab {}
+    DisplayTab {}
+  }
+  Component {
+    id: osdTab
+    OsdTab {}
   }
   Component {
     id: networkTab
-    Tabs.NetworkTab {}
+    NetworkTab {}
   }
   Component {
     id: locationTab
-    Tabs.LocationTab {}
+    LocationTab {}
   }
   Component {
     id: colorSchemeTab
-    Tabs.ColorSchemeTab {}
+    ColorSchemeTab {}
   }
   Component {
     id: wallpaperTab
-    Tabs.WallpaperTab {}
+    WallpaperTab {}
   }
   Component {
     id: screenRecorderTab
-    Tabs.ScreenRecorderTab {}
+    ScreenRecorderTab {}
   }
   Component {
     id: aboutTab
-    Tabs.AboutTab {}
+    AboutTab {}
   }
   Component {
     id: hooksTab
-    Tabs.HooksTab {}
+    HooksTab {}
   }
   Component {
     id: dockTab
-    Tabs.DockTab {}
+    DockTab {}
   }
   Component {
     id: notificationsTab
-    Tabs.NotificationsTab {}
+    NotificationsTab {}
   }
 
   // Order *DOES* matter
   function updateTabsModel() {
     let newTabs = [{
                      "id": SettingsPanel.Tab.General,
-                     "label": "General",
+                     "label": "settings.general.title",
                      "icon": "settings-general",
                      "source": generalTab
                    }, {
                      "id": SettingsPanel.Tab.Bar,
-                     "label": "Bar",
+                     "label": "settings.bar.title",
                      "icon": "settings-bar",
                      "source": barTab
                    }, {
                      "id": SettingsPanel.Tab.Dock,
-                     "label": "Dock",
+                     "label": "settings.dock.title",
                      "icon": "settings-dock",
                      "source": dockTab
                    }, {
                      "id": SettingsPanel.Tab.Launcher,
-                     "label": "Launcher",
+                     "label": "settings.launcher.title",
                      "icon": "settings-launcher",
                      "source": launcherTab
                    }, {
                      "id": SettingsPanel.Tab.Audio,
-                     "label": "Audio",
+                     "label": "settings.audio.title",
                      "icon": "settings-audio",
                      "source": audioTab
                    }, {
                      "id": SettingsPanel.Tab.Display,
-                     "label": "Display",
+                     "label": "settings.display.title",
                      "icon": "settings-display",
                      "source": displayTab
                    }, {
+                     "id": SettingsPanel.Tab.OSD,
+                     "label": "settings.osd.title",
+                     "icon": "settings-osd",
+                     "source": osdTab
+                   }, {
                      "id": SettingsPanel.Tab.Notifications,
-                     "label": "Notifications",
+                     "label": "settings.notifications.title",
                      "icon": "settings-notifications",
                      "source": notificationsTab
                    }, {
                      "id": SettingsPanel.Tab.Network,
-                     "label": "Network",
+                     "label": "settings.network.title",
                      "icon": "settings-network",
                      "source": networkTab
                    }, {
                      "id": SettingsPanel.Tab.Location,
-                     "label": "Location",
+                     "label": "settings.location.title",
                      "icon": "settings-location",
                      "source": locationTab
                    }, {
                      "id": SettingsPanel.Tab.ColorScheme,
-                     "label": "Color scheme",
+                     "label": "settings.color-scheme.title",
                      "icon": "settings-color-scheme",
                      "source": colorSchemeTab
                    }, {
                      "id": SettingsPanel.Tab.Wallpaper,
-                     "label": "Wallpaper",
+                     "label": "settings.wallpaper.title",
                      "icon": "settings-wallpaper",
                      "source": wallpaperTab
                    }, {
                      "id": SettingsPanel.Tab.ScreenRecorder,
-                     "label": "Screen recorder",
+                     "label": "settings.screen-recorder.title",
                      "icon": "settings-screen-recorder",
                      "source": screenRecorderTab
                    }, {
                      "id": SettingsPanel.Tab.Hooks,
-                     "label": "Hooks",
+                     "label": "settings.hooks.title",
                      "icon": "settings-hooks",
                      "source": hooksTab
                    }, {
                      "id": SettingsPanel.Tab.About,
-                     "label": "About",
+                     "label": "settings.about.title",
                      "icon": "settings-about",
                      "source": aboutTab
                    }]
@@ -386,14 +396,14 @@ NPanel {
                   NIcon {
                     icon: modelData.icon
                     color: tabTextColor
-                    font.pointSize: Style.fontSizeXL * scaling
+                    pointSize: Style.fontSizeXL * scaling
                   }
 
                   // Tab label
                   NText {
-                    text: modelData.label
+                    text: I18n.tr(modelData.label)
                     color: tabTextColor
-                    font.pointSize: Style.fontSizeM * scaling
+                    pointSize: Style.fontSizeM * scaling
                     font.weight: Style.fontWeightBold
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
@@ -428,7 +438,6 @@ NPanel {
           color: Color.mSurfaceVariant
           border.color: Color.mOutline
           border.width: Math.max(1, Style.borderS * scaling)
-          clip: true
 
           ColumnLayout {
             id: contentLayout
@@ -446,13 +455,13 @@ NPanel {
               NIcon {
                 icon: root.tabsModel[currentTabIndex]?.icon
                 color: Color.mPrimary
-                font.pointSize: Style.fontSizeXXL * scaling
+                pointSize: Style.fontSizeXXL * scaling
               }
 
               // Main title
               NText {
-                text: root.tabsModel[currentTabIndex]?.label || ""
-                font.pointSize: Style.fontSizeXL * scaling
+                text: I18n.tr(root.tabsModel[currentTabIndex]?.label) || ""
+                pointSize: Style.fontSizeXL * scaling
                 font.weight: Style.fontWeightBold
                 color: Color.mPrimary
                 Layout.fillWidth: true
@@ -462,7 +471,7 @@ NPanel {
               // Close button
               NIconButton {
                 icon: "close"
-                tooltipText: "Close"
+                tooltipText: I18n.tr("tooltips.close")
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: root.close()
               }
@@ -508,8 +517,6 @@ NPanel {
                       horizontalPolicy: ScrollBar.AlwaysOff
                       verticalPolicy: ScrollBar.AsNeeded
                       padding: Style.marginL * scaling
-                      clip: true
-
                       Component.onCompleted: {
                         root.activeScrollView = scrollView
                       }

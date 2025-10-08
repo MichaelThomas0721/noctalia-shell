@@ -12,18 +12,18 @@ ColumnLayout {
   spacing: Style.marginL * scaling
 
   NHeader {
-    label: "Manage Wi-Fi and Bluetooth connections."
+    description: I18n.tr("settings.network.section.description")
   }
 
   NToggle {
-    label: "Enable Wi-Fi"
+    label: I18n.tr("settings.network.wifi.label")
     checked: Settings.data.network.wifiEnabled
     onToggled: checked => NetworkService.setWifiEnabled(checked)
   }
 
   NToggle {
-    label: "Enable Bluetooth"
-    checked: Settings.data.network.bluetoothEnabled
+    label: I18n.tr("settings.network.bluetooth.label")
+    checked: BluetoothService.enabled
     onToggled: checked => BluetoothService.setBluetoothEnabled(checked)
   }
 

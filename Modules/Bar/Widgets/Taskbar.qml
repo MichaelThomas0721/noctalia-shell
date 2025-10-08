@@ -10,12 +10,30 @@ import qs.Widgets
 
 Rectangle {
   id: root
+
   property ShellScreen screen
   property real scaling: 1.0
+
+  // Widget properties passed from Bar.qml for per-instance settings
+  property string widgetId: ""
+  property string section: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
 
   readonly property bool isVerticalBar: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
   readonly property bool compact: (Settings.data.bar.density === "compact")
   readonly property real itemSize: compact ? Style.capsuleHeight * 0.9 * scaling : Style.capsuleHeight * 0.8 * scaling
+
+  property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
+  property var widgetSettings: {
+    if (section && sectionWidgetIndex >= 0) {
+      var widgets = Settings.data.bar.widgets[section]
+      if (widgets && sectionWidgetIndex < widgets.length) {
+        return widgets[sectionWidgetIndex]
+      }
+    }
+    return {}
+  }
 
   // Always visible when there are toplevels
   implicitWidth: isVerticalBar ? Math.round(Style.capsuleHeight * scaling) : taskbarLayout.implicitWidth + Style.marginM * scaling * 2
@@ -41,36 +59,37 @@ Rectangle {
     columnSpacing: isVerticalBar ? 0 : Style.marginXXS * root.scaling
 
     Repeater {
-      model: ToplevelManager && ToplevelManager.toplevels ? ToplevelManager.toplevels : []
+      model: CompositorService.windows
       delegate: Item {
         id: taskbarItem
-        required property Toplevel modelData
-        property Toplevel toplevel: modelData
-        property bool isActive: ToplevelManager.activeToplevel === modelData
+        required property var modelData
+        property ShellScreen screen: root.screen
+
+        visible: (!widgetSettings.onlySameOutput || modelData.output == screen.name) && (!widgetSettings.onlyActiveWorkspaces || CompositorService.getActiveWorkspaces().map(ws => ws.id).includes(modelData.workspaceId))
 
         Layout.preferredWidth: root.itemSize
         Layout.preferredHeight: root.itemSize
         Layout.alignment: Qt.AlignCenter
 
-        Rectangle {
-          id: iconBackground
-          anchors.centerIn: parent
+        IconImage {
+
+          id: appIcon
           width: parent.width
           height: parent.height
-          color: taskbarItem.isActive ? Color.mPrimary : root.color
-          border.width: 0
-          radius: Math.round(Style.radiusXS * root.scaling)
-          border.color: "transparent"
-          z: -1
+          source: ThemeIcons.iconForAppId(taskbarItem.modelData.appId)
+          smooth: true
+          asynchronous: true
+          opacity: modelData.isFocused ? Style.opacityFull : 0.6
 
-          IconImage {
-            id: appIcon
-            anchors.centerIn: parent
-            width: parent.width
-            height: parent.height
-            source: ThemeIcons.iconForAppId(taskbarItem.modelData.appId)
-            smooth: true
-            asynchronous: true
+          Rectangle {
+            anchors.bottomMargin: -2 * scaling
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            id: iconBackground
+            width: 4 * scaling
+            height: 4 * scaling
+            color: modelData.isFocused ? Color.mPrimary : Color.transparent
+            radius: width * 0.5
           }
         }
 
@@ -86,27 +105,20 @@ Rectangle {
 
             if (mouse.button === Qt.LeftButton) {
               try {
-                taskbarItem.modelData.activate()
+                CompositorService.focusWindow(taskbarItem.modelData)
               } catch (error) {
                 Logger.error("Taskbar", "Failed to activate toplevel: " + error)
               }
             } else if (mouse.button === Qt.RightButton) {
               try {
-                taskbarItem.modelData.close()
+                CompositorService.closeWindow(taskbarItem.modelData)
               } catch (error) {
                 Logger.error("Taskbar", "Failed to close toplevel: " + error)
               }
             }
           }
-          onEntered: taskbarTooltip.show()
-          onExited: taskbarTooltip.hide()
-        }
-
-        NTooltip {
-          id: taskbarTooltip
-          text: taskbarItem.modelData.title || taskbarItem.modelData.appId || "Unknown app."
-          target: taskbarItem
-          positionAbove: Settings.data.bar.position === "bottom"
+          onEntered: TooltipService.show(Screen, taskbarItem, taskbarItem.modelData.title || taskbarItem.modelData.appId || "Unknown app.", BarService.getTooltipDirection())
+          onExited: TooltipService.hide()
         }
       }
     }

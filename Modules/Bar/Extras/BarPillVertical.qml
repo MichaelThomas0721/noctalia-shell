@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Quickshell
 import qs.Commons
 import qs.Services
 import qs.Widgets
@@ -58,8 +59,16 @@ Item {
   width: buttonSize
   height: revealed ? (buttonSize + maxPillHeight - pillOverlap) : buttonSize
 
+  Connections {
+    target: root
+    function onTooltipTextChanged() {
+      TooltipService.updateText(root.tooltipText)
+    }
+  }
+
   Rectangle {
     id: pill
+
     width: revealed ? maxPillWidth : 1
     height: revealed ? maxPillHeight : 1
 
@@ -91,8 +100,8 @@ Item {
         return offset
       }
       text: root.text + root.suffix
-      font.family: Settings.data.ui.fontFixed
-      font.pointSize: textSize
+      family: Settings.data.ui.fontFixed
+      pointSize: textSize
       font.weight: Style.fontWeightMedium
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
@@ -144,7 +153,7 @@ Item {
 
     NIcon {
       icon: root.icon
-      font.pointSize: iconSize
+      pointSize: iconSize
       color: hovered ? Color.mOnTertiary : Color.mOnSurface
       // Center horizontally
       x: (iconCircle.width - width) / 2
@@ -236,16 +245,6 @@ Item {
     }
   }
 
-  NTooltip {
-    id: tooltip
-    target: pill
-    text: root.tooltipText
-    positionLeft: barPosition === "right"
-    positionRight: barPosition === "left"
-    positionAbove: Settings.data.bar.position === "bottom"
-    delay: Style.tooltipDelayLong
-  }
-
   Timer {
     id: showTimer
     interval: Style.pillDelay
@@ -263,7 +262,7 @@ Item {
     onEntered: {
       hovered = true
       root.entered()
-      tooltip.show()
+      TooltipService.show(Screen, pill, root.tooltipText, BarService.getTooltipDirection(), Style.tooltipDelayLong)
       if (disableOpen || forceClose) {
         return
       }
@@ -277,7 +276,7 @@ Item {
       if (!forceOpen && !forceClose) {
         hide()
       }
-      tooltip.hide()
+      TooltipService.hide()
     }
     onClicked: function (mouse) {
       if (mouse.button === Qt.LeftButton) {

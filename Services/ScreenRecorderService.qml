@@ -54,7 +54,10 @@ Singleton {
       videoDir += "/"
     }
     outputPath = videoDir + filename
-    var flags = `-w ${settings.videoSource} -f ${settings.frameRate} -ac ${settings.audioCodec} -k ${settings.videoCodec} -a ${settings.audioSource} -q ${settings.quality} -cursor ${settings.showCursor ? "yes" : "no"} -cr ${settings.colorRange} -o ${outputPath}`
+
+    var audioArg = (settings.audioSource === "both") ? `-a "default_output|default_input"` : `-a ${settings.audioSource}`
+
+    var flags = `-w ${settings.videoSource} -f ${settings.frameRate} -ac ${settings.audioCodec} -k ${settings.videoCodec} ${audioArg} -q ${settings.quality} -cursor ${settings.showCursor ? "yes" : "no"} -cr ${settings.colorRange} -o "${outputPath}"`
     var command = `
     _gpuscreenrecorder_flatpak_installed() {
     flatpak list --app | grep -q "com.dec05eba.gpu_screen_recorder"
@@ -64,7 +67,7 @@ Singleton {
     elif command -v flatpak >/dev/null 2>&1 && _gpuscreenrecorder_flatpak_installed; then
     flatpak run --command=gpu-screen-recorder --file-forwarding com.dec05eba.gpu_screen_recorder ${flags}
     else
-    notify-send "gpu-screen-recorder not installed!" -u critical
+    echo "GPU_SCREEN_RECORDER_NOT_INSTALLED"
     fi`
 
     // Use Process instead of execDetached so we can monitor it and read stderr
@@ -82,7 +85,7 @@ Singleton {
       return
     }
 
-    ToastService.showNotice("Stopping recording…", outputPath, 2000)
+    ToastService.showNotice(I18n.tr("toast.recording.stopping"), outputPath, 2000)
 
     Quickshell.execDetached(["sh", "-c", "pkill -SIGINT -f 'gpu-screen-recorder' || pkill -SIGINT -f 'com.dec05eba.gpu_screen_recorder'"])
 
@@ -106,13 +109,21 @@ Singleton {
         // Process ended while we were pending - likely cancelled or error
         isPending = false
         pendingTimer.running = false
+
+        // Check if gpu-screen-recorder is not installed
+        const stdout = String(stdout.text || "").trim()
+        if (stdout === "GPU_SCREEN_RECORDER_NOT_INSTALLED") {
+          ToastService.showError(I18n.tr("toast.recording.not-installed"), I18n.tr("toast.recording.not-installed-desc"), 7000)
+          return
+        }
+
         // If it failed to start, show a clear error toast with stderr
         if (exitCode !== 0) {
           const err = String(stderr.text || "").trim()
           if (err.length > 0)
-            ToastService.showError("Failed to start recording", err, 7000)
+            ToastService.showError(I18n.tr("toast.recording.failed-start"), err, 7000)
           else
-            ToastService.showError("Failed to start recording", "gpu-screen-recorder exited unexpectedly.", 7000)
+            ToastService.showError(I18n.tr("toast.recording.failed-start"), I18n.tr("toast.recording.failed-gpu"), 7000)
         }
       } else if (isRecording) {
         // Process ended normally while recording
@@ -120,13 +131,13 @@ Singleton {
         monitorTimer.running = false
         // Consider successful save if exitCode == 0
         if (exitCode === 0) {
-          ToastService.showNotice("Recording saved", outputPath, 5000)
+          ToastService.showNotice(I18n.tr("toast.recording.saved"), outputPath, 5000)
         } else {
           const err2 = String(stderr.text || "").trim()
           if (err2.length > 0)
-            ToastService.showError("Recording failed", err2, 7000)
+            ToastService.showError(I18n.tr("toast.recording.failed-start"), err2, 7000)
           else
-            ToastService.showError("Recording failed", "The recorder exited with an error.", 7000)
+            ToastService.showError(I18n.tr("toast.recording.failed-start"), I18n.tr("toast.recording.failed-general"), 7000)
         }
       }
     }
@@ -142,7 +153,7 @@ Singleton {
       } else {
         isPending = false
         hasActiveRecording = false
-        ToastService.showError("Desktop portals not running", "Start xdg-desktop-portal and a compositor portal (wlr/hyprland/gnome/kde).", 8000)
+        ToastService.showError(I18n.tr("toast.recording.no-portals"), I18n.tr("toast.recording.no-portals-desc"), 8000)
       }
     }
   }

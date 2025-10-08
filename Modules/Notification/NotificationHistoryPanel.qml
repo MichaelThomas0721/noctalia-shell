@@ -16,6 +16,10 @@ NPanel {
   preferredHeight: 480
   panelKeyboardFocus: true
 
+  onOpened: function () {
+    Settings.data.notifications.lastSeenTs = Time.timestamp * 1000
+  }
+
   panelContent: Rectangle {
     id: notificationRect
     color: Color.transparent
@@ -32,13 +36,13 @@ NPanel {
 
         NIcon {
           icon: "bell"
-          font.pointSize: Style.fontSizeXXL * scaling
+          pointSize: Style.fontSizeXXL * scaling
           color: Color.mPrimary
         }
 
         NText {
-          text: "Notifications"
-          font.pointSize: Style.fontSizeL * scaling
+          text: I18n.tr("notifications.panel.title")
+          pointSize: Style.fontSizeL * scaling
           font.weight: Style.fontWeightBold
           color: Color.mOnSurface
           Layout.fillWidth: true
@@ -46,14 +50,14 @@ NPanel {
 
         NIconButton {
           icon: Settings.data.notifications.doNotDisturb ? "bell-off" : "bell"
-          tooltipText: `'Do not disturb' ${Settings.data.notifications.doNotDisturb ? "enabled" : "disabled"}`
+          tooltipText: Settings.data.notifications.doNotDisturb ? I18n.tr("tooltips.do-not-disturb-enabled") : I18n.tr("tooltips.do-not-disturb-disabled")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb
         }
 
         NIconButton {
           icon: "trash"
-          tooltipText: "Clear history"
+          tooltipText: I18n.tr("tooltips.clear-history")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: {
             NotificationService.clearHistory()
@@ -64,7 +68,7 @@ NPanel {
 
         NIconButton {
           icon: "close"
-          tooltipText: "Close"
+          tooltipText: I18n.tr("tooltips.close")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: root.close()
         }
@@ -88,21 +92,21 @@ NPanel {
 
         NIcon {
           icon: "bell-off"
-          font.pointSize: 64 * scaling
+          pointSize: 64 * scaling
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
         }
 
         NText {
-          text: "No notifications"
-          font.pointSize: Style.fontSizeL * scaling
+          text: I18n.tr("notifications.panel.no-notifications")
+          pointSize: Style.fontSizeL * scaling
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
         }
 
         NText {
-          text: "Your notifications will show up here as they arrive."
-          font.pointSize: Style.fontSizeS * scaling
+          text: I18n.tr("notifications.panel.description")
+          pointSize: Style.fontSizeS * scaling
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
           Layout.fillWidth: true
@@ -129,8 +133,12 @@ NPanel {
         boundsBehavior: Flickable.StopAtBounds
         visible: NotificationService.historyList.count > 0
 
+        // Track which notification is expanded
+        property string expandedId: ""
+
         delegate: Rectangle {
           property string notificationId: model.id
+          property bool isExpanded: notificationList.expandedId === notificationId
 
           width: notificationList.width
           height: notificationLayout.implicitHeight + (Style.marginM * scaling * 2)
@@ -139,11 +147,34 @@ NPanel {
           border.color: Qt.alpha(Color.mOutline, Style.opacityMedium)
           border.width: Math.max(1, Style.borderS * scaling)
 
+          Behavior on height {
+            NumberAnimation {
+              duration: Style.animationNormal
+              easing.type: Easing.InOutQuad
+            }
+          }
+
           // Smooth color transition on hover
           Behavior on color {
             ColorAnimation {
               duration: Style.animationFast
             }
+          }
+
+          // Click to expand/collapse
+          MouseArea {
+            anchors.fill: parent
+            // Don't capture clicks on the delete button
+            anchors.rightMargin: 48 * scaling
+            enabled: (summaryText.truncated || bodyText.truncated)
+            onClicked: {
+              if (notificationList.expandedId === notificationId) {
+                notificationList.expandedId = ""
+              } else {
+                notificationList.expandedId = notificationId
+              }
+            }
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
           }
 
           RowLayout {
@@ -174,6 +205,7 @@ NPanel {
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignTop
               spacing: Style.marginXS * scaling
+              Layout.rightMargin: -(Style.marginM + Style.baseWidgetSize * 0.6) * scaling
 
               // Header row with app name and timestamp
               RowLayout {
@@ -199,13 +231,13 @@ NPanel {
 
                 NText {
                   text: model.appName || "Unknown App"
-                  font.pointSize: Style.fontSizeXS * scaling
+                  pointSize: Style.fontSizeXS * scaling
                   color: Color.mSecondary
                 }
 
                 NText {
                   text: Time.formatRelativeTime(model.timestamp)
-                  font.pointSize: Style.fontSizeXS * scaling
+                  pointSize: Style.fontSizeXS * scaling
                   color: Color.mSecondary
                 }
 
@@ -216,35 +248,67 @@ NPanel {
 
               // Summary
               NText {
-                text: model.summary || "No summary"
-                font.pointSize: Style.fontSizeM * scaling
+                id: summaryText
+                text: model.summary || I18n.tr("general.no-summary")
+                pointSize: Style.fontSizeM * scaling
                 font.weight: Font.Medium
                 color: Color.mOnSurface
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                maximumLineCount: 2
+                maximumLineCount: isExpanded ? 999 : 2
                 elide: Text.ElideRight
               }
 
               // Body
               NText {
+                id: bodyText
                 text: model.body || ""
-                font.pointSize: Style.fontSizeS * scaling
+                pointSize: Style.fontSizeS * scaling
                 color: Color.mOnSurfaceVariant
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                maximumLineCount: 3
+                maximumLineCount: isExpanded ? 999 : 3
                 elide: Text.ElideRight
                 visible: text.length > 0
+              }
+
+              // Spacer for expand indicator
+              Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: (!isExpanded && (summaryText.truncated || bodyText.truncated)) ? (Style.marginS * scaling) : 0
+              }
+
+              // Expand indicator
+              RowLayout {
+                Layout.fillWidth: true
+                visible: !isExpanded && (summaryText.truncated || bodyText.truncated)
+                spacing: Style.marginXS * scaling
+
+                Item {
+                  Layout.fillWidth: true
+                }
+
+                NText {
+                  text: I18n.tr("notifications.panel.click-to-expand") || "Click to expand"
+                  pointSize: Style.fontSizeXS * scaling
+                  color: Color.mPrimary
+                  font.weight: Font.Medium
+                }
+
+                NIcon {
+                  icon: "chevron-down"
+                  pointSize: Style.fontSizeS * scaling
+                  color: Color.mPrimary
+                }
               }
             }
 
             // Delete button
             NIconButton {
               icon: "trash"
-              tooltipText: "Delete notification"
+              tooltipText: I18n.tr("tooltips.delete-notification")
               baseSize: Style.baseWidgetSize * 0.7
               Layout.alignment: Qt.AlignTop
 

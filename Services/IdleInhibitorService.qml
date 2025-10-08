@@ -10,7 +10,7 @@ Singleton {
   id: root
 
   property bool isInhibited: false
-  property string reason: "User requested"
+  property string reason: I18n.tr("system.user-requested")
   property var activeInhibitors: []
 
   // Different inhibitor strategies
@@ -131,7 +131,7 @@ Singleton {
 
   // Systemd inhibition using systemd-inhibit
   function startSystemdInhibition() {
-    inhibitorProcess.command = ["systemd-inhibit", "--what=idle:sleep:handle-lid-switch", "--why=" + reason, "--mode=block", "sleep", "infinity"]
+    inhibitorProcess.command = ["systemd-inhibit", "--what=idle", "--why=" + reason, "--mode=block", "sleep", "infinity"]
     inhibitorProcess.running = true
   }
 
@@ -163,13 +163,13 @@ Singleton {
     if (activeInhibitors.includes("manual")) {
       removeInhibitor("manual")
       Settings.data.ui.idleInhibitorEnabled = false
-      ToastService.showNotice("Keep awake", "Disabled")
+      ToastService.showNotice(I18n.tr("tooltips.keep-awake"), I18n.tr("toast.keep-awake.disabled"))
       Logger.log("IdleInhibitor", "Manual inhibition disabled and saved to settings")
       return false
     } else {
       addInhibitor("manual", "Manually activated by user")
       Settings.data.ui.idleInhibitorEnabled = true
-      ToastService.showNotice("Keep awake", "Enabled")
+      ToastService.showNotice(I18n.tr("tooltips.keep-awake"), I18n.tr("toast.keep-awake.enabled"))
       Logger.log("IdleInhibitor", "Manual inhibition enabled and saved to settings")
       return true
     }

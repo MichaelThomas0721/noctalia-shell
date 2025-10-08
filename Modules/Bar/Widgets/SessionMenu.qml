@@ -8,13 +8,13 @@ import qs.Widgets
 NIconButton {
   id: root
 
-  property ShellScreen screen
   property real scaling: 1.0
 
   compact: (Settings.data.bar.density === "compact")
   baseSize: Style.capsuleHeight
   icon: "power"
-  tooltipText: "Session menu"
+  tooltipText: I18n.tr("tooltips.session-menu")
+  tooltipDirection: BarService.getTooltipDirection()
   colorBg: (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent)
   colorFg: Color.mError
   colorBorder: Color.transparent

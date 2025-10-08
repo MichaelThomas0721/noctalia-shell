@@ -108,7 +108,6 @@ PopupWindow {
     anchors.margins: Style.marginS * scaling
     contentHeight: columnLayout.implicitHeight
     interactive: true
-    clip: true
 
     // Use a ColumnLayout to handle menu item arrangement
     ColumnLayout {
@@ -160,7 +159,7 @@ PopupWindow {
                 Layout.fillWidth: true
                 color: (modelData?.enabled ?? true) ? (mouseArea.containsMouse ? Color.mOnTertiary : Color.mOnSurface) : Color.mOnSurfaceVariant
                 text: modelData?.text !== "" ? modelData?.text.replace(/[\n\r]+/g, ' ') : "..."
-                font.pointSize: Style.fontSizeS * scaling
+                pointSize: Style.fontSizeS * scaling
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
               }
@@ -175,7 +174,7 @@ PopupWindow {
 
               NIcon {
                 icon: modelData?.hasChildren ? "menu" : ""
-                font.pointSize: Style.fontSizeS * scaling
+                pointSize: Style.fontSizeS * scaling
                 verticalAlignment: Text.AlignVCenter
                 visible: modelData?.hasChildren ?? false
                 color: (mouseArea.containsMouse ? Color.mOnTertiary : Color.mOnSurface)
@@ -225,7 +224,7 @@ PopupWindow {
 
                   // Check bar position first
                   const barPosition = Settings.data.bar.position
-                  const globalPos = entry.mapToGlobal(0, 0)
+                  const globalPos = entry.mapToItem(null, 0, 0)
 
                   if (barPosition === "right") {
                     // Bar is on the right, prefer opening submenus to the left

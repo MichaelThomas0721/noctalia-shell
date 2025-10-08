@@ -14,7 +14,7 @@ NPanel {
   id: root
 
   preferredWidth: 440
-  preferredHeight: 410
+  preferredHeight: 480
   panelAnchorHorizontalCenter: true
   panelAnchorVerticalCenter: true
   panelKeyboardFocus: true
@@ -30,28 +30,33 @@ NPanel {
   readonly property var powerOptions: [{
       "action": "lock",
       "icon": "lock",
-      "title": "Lock",
-      "subtitle": "Lock your session"
+      "title": I18n.tr("session-menu.lock"),
+      "subtitle": I18n.tr("session-menu.lock-subtitle")
+    }, {
+      "action": "lockAndSuspend",
+      "icon": "lock-pause",
+      "title": I18n.tr("session-menu.lock-and-suspend"),
+      "subtitle": I18n.tr("session-menu.lock-and-suspend-subtitle")
     }, {
       "action": "suspend",
       "icon": "suspend",
-      "title": "Suspend",
-      "subtitle": "Put the system to sleep"
+      "title": I18n.tr("session-menu.suspend"),
+      "subtitle": I18n.tr("session-menu.suspend-subtitle")
     }, {
       "action": "reboot",
       "icon": "reboot",
-      "title": "Reboot",
-      "subtitle": "Restart the system"
+      "title": I18n.tr("session-menu.reboot"),
+      "subtitle": I18n.tr("session-menu.reboot-subtitle")
     }, {
       "action": "logout",
       "icon": "logout",
-      "title": "Logout",
-      "subtitle": "End your session"
+      "title": I18n.tr("session-menu.logout"),
+      "subtitle": I18n.tr("session-menu.logout-subtitle")
     }, {
       "action": "shutdown",
       "icon": "shutdown",
-      "title": "Shutdown",
-      "subtitle": "Turn off the system",
+      "title": I18n.tr("session-menu.shutdown"),
+      "subtitle": I18n.tr("session-menu.shutdown-subtitle"),
       "isShutdown": true
     }]
 
@@ -96,6 +101,9 @@ NPanel {
       if (!lockScreen.active) {
         lockScreen.active = true
       }
+      break
+    case "lockAndSuspend":
+      CompositorService.lockAndSuspend()
       break
     case "suspend":
       CompositorService.suspend()
@@ -263,9 +271,12 @@ NPanel {
         Layout.preferredHeight: Style.baseWidgetSize * 0.8 * scaling
 
         NText {
-          text: timerActive ? `${pendingAction.charAt(0).toUpperCase() + pendingAction.slice(1)} in ${Math.ceil(timeRemaining / 1000)} seconds...` : "Session Menu"
+          text: timerActive ? I18n.tr("session-menu.action-in-seconds", {
+                                        "action": pendingAction.charAt(0).toUpperCase() + pendingAction.slice(1),
+                                        "seconds": Math.ceil(timeRemaining / 1000)
+                                      }) : I18n.tr("session-menu.title")
           font.weight: Style.fontWeightBold
-          font.pointSize: Style.fontSizeL * scaling
+          pointSize: Style.fontSizeL * scaling
           color: timerActive ? Color.mPrimary : Color.mOnSurface
           Layout.alignment: Qt.AlignVCenter
           verticalAlignment: Text.AlignVCenter
@@ -277,7 +288,7 @@ NPanel {
 
         NIconButton {
           icon: timerActive ? "stop" : "close"
-          tooltipText: timerActive ? "Cancel timer" : "Close"
+          tooltipText: timerActive ? I18n.tr("tooltips.cancel-timer") : I18n.tr("tooltips.close")
           Layout.alignment: Qt.AlignVCenter
           colorBg: timerActive ? Qt.alpha(Color.mError, 0.08) : Color.transparent
           colorFg: timerActive ? Color.mError : Color.mOnSurface
@@ -374,7 +385,7 @@ NPanel {
             return Color.mOnTertiary
           return Color.mOnSurface
         }
-        font.pointSize: Style.fontSizeXXXL * scaling
+        pointSize: Style.fontSizeXXXL * scaling
         width: Style.baseWidgetSize * 0.6 * scaling
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -398,7 +409,7 @@ NPanel {
         NText {
           text: buttonRoot.title
           font.weight: Style.fontWeightMedium
-          font.pointSize: Style.fontSizeM * scaling
+          pointSize: Style.fontSizeM * scaling
           color: {
             if (buttonRoot.pending)
               return Color.mPrimary
@@ -419,11 +430,11 @@ NPanel {
         NText {
           text: {
             if (buttonRoot.pending) {
-              return "Click again to execute immediately"
+              return I18n.tr("session-menu.click-again")
             }
             return buttonRoot.subtitle
           }
-          font.pointSize: Style.fontSizeXS * scaling
+          pointSize: Style.fontSizeXS * scaling
           color: {
             if (buttonRoot.pending)
               return Color.mPrimary
@@ -453,7 +464,7 @@ NPanel {
         NText {
           anchors.centerIn: parent
           text: Math.ceil(timeRemaining / 1000)
-          font.pointSize: Style.fontSizeS * scaling
+          pointSize: Style.fontSizeS * scaling
           font.weight: Style.fontWeightBold
           color: Color.mOnPrimary
         }

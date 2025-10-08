@@ -16,7 +16,8 @@ ColumnLayout {
 
   // Local state
   property bool valueUsePrimaryColor: widgetData.usePrimaryColor !== undefined ? widgetData.usePrimaryColor : widgetMetadata.usePrimaryColor
-  property bool valueUseMonospacedFont: widgetData.useMonospacedFont !== undefined ? widgetData.useMonospacedFont : widgetMetadata.useMonospacedFont
+  property bool valueUseCustomFont: widgetData.useCustomFont !== undefined ? widgetData.useCustomFont : widgetMetadata.useCustomFont
+  property string valueCustomFont: widgetData.customFont !== undefined ? widgetData.customFont : widgetMetadata.customFont
   property string valueFormatHorizontal: widgetData.formatHorizontal !== undefined ? widgetData.formatHorizontal : widgetMetadata.formatHorizontal
   property string valueFormatVertical: widgetData.formatVertical !== undefined ? widgetData.formatVertical : widgetMetadata.formatVertical
 
@@ -29,7 +30,8 @@ ColumnLayout {
   function saveSettings() {
     var settings = Object.assign({}, widgetData || {})
     settings.usePrimaryColor = valueUsePrimaryColor
-    settings.useMonospacedFont = valueUseMonospacedFont
+    settings.useCustomFont = valueUseCustomFont
+    settings.customFont = valueCustomFont
     settings.formatHorizontal = valueFormatHorizontal.trim()
     settings.formatVertical = valueFormatVertical.trim()
     return settings
@@ -64,18 +66,34 @@ ColumnLayout {
 
   NToggle {
     Layout.fillWidth: true
-    label: "Use primary color"
-    description: "When enabled, this applies the primary color for emphasis."
+    label: I18n.tr("bar.widget-settings.clock.use-primary-color.label")
+    description: I18n.tr("bar.widget-settings.clock.use-primary-color.description")
     checked: valueUsePrimaryColor
     onToggled: checked => valueUsePrimaryColor = checked
   }
 
   NToggle {
     Layout.fillWidth: true
-    label: "Use monospaced font"
-    description: "When enabled, the clock will use the monospaced font."
-    checked: valueUseMonospacedFont
-    onToggled: checked => valueUseMonospacedFont = checked
+    label: I18n.tr("bar.widget-settings.clock.use-custom-font.label")
+    description: I18n.tr("bar.widget-settings.clock.use-custom-font.description")
+    checked: valueUseCustomFont
+    onToggled: checked => valueUseCustomFont = checked
+  }
+
+  NSearchableComboBox {
+    Layout.fillWidth: true
+    visible: valueUseCustomFont
+    label: I18n.tr("bar.widget-settings.clock.custom-font.label")
+    description: I18n.tr("bar.widget-settings.clock.custom-font.description")
+    model: FontService.availableFonts
+    currentKey: valueCustomFont
+    placeholder: I18n.tr("bar.widget-settings.clock.custom-font.placeholder")
+    searchPlaceholder: I18n.tr("bar.widget-settings.clock.custom-font.search-placeholder")
+    popupHeight: 420 * scaling
+    minimumWidth: 300 * scaling
+    onSelected: function (key) {
+      valueCustomFont = key
+    }
   }
 
   NDivider {
@@ -83,8 +101,8 @@ ColumnLayout {
   }
 
   NHeader {
-    label: "Clock display"
-    description: "Customize your clock's display by adding tokens from the list below. To use the 12-hour format, you must include the 'AP' token."
+    label: I18n.tr("bar.widget-settings.clock.clock-display.label")
+    description: I18n.tr("bar.widget-settings.clock.clock-display.description")
   }
 
   RowLayout {
@@ -104,8 +122,8 @@ ColumnLayout {
       NTextInput {
         id: inputHoriz
         Layout.fillWidth: true
-        label: "Horizontal bar"
-        description: "Tip: Use \\n to create a line break."
+        label: I18n.tr("bar.widget-settings.clock.horizontal-bar.label")
+        description: I18n.tr("bar.widget-settings.clock.horizontal-bar.description")
         placeholderText: "HH:mm ddd, MMM dd"
         text: valueFormatHorizontal
         onTextChanged: valueFormatHorizontal = text
@@ -127,8 +145,9 @@ ColumnLayout {
       NTextInput {
         id: inputVert
         Layout.fillWidth: true
-        label: "Vertical bar"
-        description: "Use a space to separate each part onto a new line."
+        label: I18n.tr("bar.widget-settings.clock.vertical-bar.label")
+        description: I18n.tr("bar.widget-settings.clock.vertical-bar.description")
+        // Tokens are Qt format tokens and must not be localized
         placeholderText: "HH mm dd MM"
         text: valueFormatVertical
         onTextChanged: valueFormatVertical = text
@@ -151,7 +170,7 @@ ColumnLayout {
       Layout.fillWidth: false
 
       NLabel {
-        label: "Preview"
+        label: I18n.tr("bar.widget-settings.clock.preview")
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
       }
 
@@ -181,12 +200,12 @@ ColumnLayout {
             // Horizontal
             Repeater {
               Layout.topMargin: Style.marginM * scaling
-              model: Qt.formatDateTime(now, valueFormatHorizontal.trim()).split("\\n")
+              model: Qt.locale().toString(now, valueFormatHorizontal.trim()).split("\\n")
               delegate: NText {
                 visible: text !== ""
                 text: modelData
-                font.family: valueUseMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-                font.pointSize: Style.fontSizeM * scaling
+                family: valueUseCustomFont && valueCustomFont ? valueCustomFont : Settings.data.ui.fontDefault
+                pointSize: Style.fontSizeM * scaling
                 font.weight: Style.fontWeightBold
                 color: valueUsePrimaryColor ? Color.mPrimary : Color.mOnSurface
                 wrapMode: Text.WordWrap
@@ -212,12 +231,12 @@ ColumnLayout {
 
             Repeater {
               Layout.topMargin: Style.marginM * scaling
-              model: Qt.formatDateTime(now, valueFormatVertical.trim()).split(" ")
+              model: Qt.locale().toString(now, valueFormatVertical.trim()).split(" ")
               delegate: NText {
                 visible: text !== ""
                 text: modelData
-                font.family: valueUseMonospacedFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-                font.pointSize: Style.fontSizeM * scaling
+                family: valueUseCustomFont && valueCustomFont ? valueCustomFont : Settings.data.ui.fontDefault
+                pointSize: Style.fontSizeM * scaling
                 font.weight: Style.fontWeightBold
                 color: valueUsePrimaryColor ? Color.mPrimary : Color.mOnSurface
                 wrapMode: Text.WordWrap

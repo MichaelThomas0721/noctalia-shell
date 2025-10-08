@@ -9,6 +9,13 @@ Item {
   id: root
 
   IpcHandler {
+    target: "bar"
+    function toggle() {
+      BarService.isVisible = !BarService.isVisible
+    }
+  }
+
+  IpcHandler {
     target: "screenRecorder"
     function toggle() {
       if (ScreenRecorderService.isAvailable) {
@@ -28,10 +35,13 @@ Item {
     target: "notifications"
     function toggleHistory() {
       // Will attempt to open the panel next to the bar button if any.
-      notificationHistoryPanel.toggle(BarService.lookupWidget("NotificationHistory"))
+      notificationHistoryPanel.toggle(null, "NotificationHistory")
     }
     function toggleDND() {
       Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb
+    }
+    function clear() {
+      NotificationService.clearHistory()
     }
   }
 
@@ -109,14 +119,6 @@ Item {
     }
   }
 
-  // TODO: delete in next major release
-  IpcHandler {
-    target: "powerPanel"
-    function toggle() {
-      sessionMenuPanel.toggle()
-      ToastService.showWarning("IPC", "PowerPanel has been renamed to SessionMenu, this IPC call will be deprecated soon. Please use \"ipc call sessionMenu toggle\" instead.", 8000)
-    }
-  }
   IpcHandler {
     target: "sessionMenu"
     function toggle() {
@@ -124,20 +126,11 @@ Item {
     }
   }
 
-  // TODO: delete in next major release
-  IpcHandler {
-    target: "sidePanel"
-    function toggle() {
-      // Will attempt to open the panel next to the bar button if any.
-      controlCenterPanel.toggle(BarService.lookupWidget("ControlCenter"))
-      ToastService.showWarning("IPC", "SidePanel has been renamed to ControlCenter, this IPC call will be deprecated soon. Please use \"ipc call controlCenter toggle\" instead.", 8000)
-    }
-  }
   IpcHandler {
     target: "controlCenter"
     function toggle() {
       // Will attempt to open the panel next to the bar button if any.
-      controlCenterPanel.toggle(BarService.lookupWidget("ControlCenter"))
+      controlCenterPanel.toggle(null, "ControlCenter")
     }
   }
 
@@ -161,6 +154,57 @@ Item {
         screen = undefined
       }
       WallpaperService.changeWallpaper(path, screen)
+    }
+
+    function toggleAutomation() {
+      Settings.data.wallpaper.randomEnabled = !Settings.data.wallpaper.randomEnabled
+    }
+    function disableAutomation() {
+      Settings.data.wallpaper.randomEnabled = false
+    }
+    function enableAutomation() {
+      Settings.data.wallpaper.randomEnabled = true
+    }
+  }
+
+  IpcHandler {
+    target: "media"
+    function playPause() {
+      MediaService.playPause()
+    }
+
+    function play() {
+      MediaService.play()
+    }
+
+    function pause() {
+      MediaService.pause()
+    }
+
+    function next() {
+      MediaService.next()
+    }
+
+    function previous() {
+      MediaService.previous()
+    }
+
+    function seekRelative(offset: string) {
+      var offsetVal = parseFloat(position)
+      if (Number.isNaN(offsetVal)) {
+        Logger.warn("Media", "Argument to ipc call 'media seekRelative' must be a number")
+        return
+      }
+      MediaService.seekRelative(offsetVal)
+    }
+
+    function seekByRatio(position: string) {
+      var positionVal = parseFloat(position)
+      if (Number.isNaN(positionVal)) {
+        Logger.warn("Media", "Argument to ipc call 'media seekByRatio' must be a number")
+        return
+      }
+      MediaService.seekByRatio(positionVal)
     }
   }
 }

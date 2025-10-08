@@ -8,6 +8,7 @@ import qs.Widgets
 
 ColumnLayout {
   id: root
+
   spacing: Style.marginL * scaling
 
   // Helper functions to update arrays immutably
@@ -24,30 +25,42 @@ ColumnLayout {
   }
 
   NHeader {
-    label: "Appearance"
-    description: "Customize the dock's behavior and appearance."
-  }
-
-  NToggle {
-    label: "Auto-hide"
-    description: "Automatically hide when not in use."
-    checked: Settings.data.dock.autoHide
-    onToggled: checked => Settings.data.dock.autoHide = checked
-  }
-
-  NToggle {
-    label: "Exclusive zone"
-    description: "Prevent window overlap."
-    checked: Settings.data.dock.exclusive
-    onToggled: checked => Settings.data.dock.exclusive = checked
+    label: I18n.tr("settings.dock.appearance.section.label")
+    description: I18n.tr("settings.dock.appearance.section.description")
   }
 
   ColumnLayout {
     spacing: Style.marginXXS * scaling
     Layout.fillWidth: true
     NLabel {
-      label: "Background opacity"
-      description: "Adjust the dock's background opacity."
+      label: I18n.tr("settings.dock.appearance.display.label")
+      description: I18n.tr("settings.dock.appearance.display.description")
+    }
+    NComboBox {
+      Layout.fillWidth: true
+      model: [{
+          "key": "always_visible",
+          "name": I18n.tr("settings.dock.appearance.display.always-visible")
+        }, {
+          "key": "auto_hide",
+          "name": I18n.tr("settings.dock.appearance.display.auto-hide")
+        }, {
+          "key": "exclusive",
+          "name": I18n.tr("settings.dock.appearance.display.exclusive")
+        }]
+      currentKey: Settings.data.dock.displayMode
+      onSelected: key => {
+                    Settings.data.dock.displayMode = key
+                  }
+    }
+  }
+
+  ColumnLayout {
+    spacing: Style.marginXXS * scaling
+    Layout.fillWidth: true
+    NLabel {
+      label: I18n.tr("settings.dock.appearance.background-opacity.label")
+      description: I18n.tr("settings.dock.appearance.background-opacity.description")
     }
     NValueSlider {
       Layout.fillWidth: true
@@ -65,8 +78,8 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NLabel {
-      label: "Dock floating distance"
-      description: "Adjust the floating distance from the screen edge."
+      label: I18n.tr("settings.dock.appearance.floating-distance.label")
+      description: I18n.tr("settings.dock.appearance.floating-distance.description")
     }
 
     NValueSlider {
@@ -92,8 +105,8 @@ ColumnLayout {
     Layout.fillWidth: true
 
     NHeader {
-      label: "Monitor display"
-      description: "Choose which monitor to display the dock on."
+      label: I18n.tr("settings.dock.monitors.section.label")
+      description: I18n.tr("settings.dock.monitors.section.description")
     }
 
     Repeater {
@@ -101,7 +114,11 @@ ColumnLayout {
       delegate: NCheckbox {
         Layout.fillWidth: true
         label: modelData.name || "Unknown"
-        description: `${modelData.model} (${modelData.width}x${modelData.height})`
+        description: I18n.tr("system.monitor-description", {
+                               "model": modelData.model,
+                               "width": modelData.width,
+                               "height": modelData.height
+                             })
         checked: (Settings.data.dock.monitors || []).indexOf(modelData.name) !== -1
         onToggled: checked => {
                      if (checked) {
@@ -112,6 +129,13 @@ ColumnLayout {
                    }
       }
     }
+  }
+
+  NToggle {
+    label: I18n.tr("settings.dock.monitors.only-same-output.label")
+    description: I18n.tr("settings.dock.monitors.only-same-output.description")
+    checked: Settings.data.dock.onlySameOutput
+    onToggled: checked => Settings.data.dock.onlySameOutput = checked
   }
 
   NDivider {

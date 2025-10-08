@@ -24,13 +24,14 @@ Singleton {
   // Internal state
   property var activeMap: ({})
   property var imageQueue: []
-  property var progressTimers: ({})
 
-  // Simple image cacher
+  // Performance optimization: Track notification metadata separately
+  property var notificationMetadata: ({}) // Stores timestamp and duration for each notification
+
   PanelWindow {
     implicitHeight: 1
     implicitWidth: 1
-    color: "transparent"
+    color: Color.transparent
     mask: Region {}
 
     Image {
@@ -49,7 +50,6 @@ Singleton {
         const req = imageQueue[0]
 
         if (status === Image.Ready) {
-          Logger.log("Notification", "Caching image to:", req.dest)
           Quickshell.execDetached(["mkdir", "-p", Settings.cacheDirImagesNotifications])
           grabToImage(result => {
                         if (result.saveToFile(req.dest))
@@ -92,11 +92,34 @@ Singleton {
     notification.tracked = true
     notification.closed.connect(() => removeActive(data.id))
 
+    // Store metadata for efficient progress calculation
+    const durations = [Settings.data.notifications?.lowUrgencyDuration * 1000 || 3000, Settings.data.notifications?.normalUrgencyDuration * 1000 || 8000, Settings.data.notifications?.criticalUrgencyDuration * 1000 || 15000]
+
+    let expire = 0
+    if (Settings.data.notifications?.respectExpireTimeout) {
+      if (data.expireTimeout === 0) {
+        expire = -1 // Never expire
+      } else if (data.expireTimeout > 0) {
+        expire = data.expireTimeout
+      } else {
+        expire = durations[data.urgency]
+      }
+    } else {
+      expire = durations[data.urgency]
+    }
+
+    notificationMetadata[data.id] = {
+      "timestamp": data.timestamp.getTime(),
+      "duration": expire,
+      "urgency": data.urgency
+    }
+
     activeList.insert(0, data)
     while (activeList.count > maxVisible) {
       const last = activeList.get(activeList.count - 1)
       activeMap[last.id]?.dismiss()
       activeList.remove(activeList.count - 1)
+      delete notificationMetadata[last.id]
     }
   }
 
@@ -137,7 +160,6 @@ Singleton {
 
     const dest = Settings.cacheDirImagesNotifications + imageId + ".png"
 
-    // Skip if already queued
     for (const req of imageQueue) {
       if (req.imageId === imageId)
         return
@@ -149,7 +171,6 @@ Singleton {
                       "imageId": imageId
                     })
 
-    // If we have a single item in the queue, process it immediately
     if (imageQueue.length === 1)
       cacher.source = path
   }
@@ -174,40 +195,56 @@ Singleton {
       if (activeList.get(i).id === id) {
         activeList.remove(i)
         delete activeMap[id]
-        delete progressTimers[id]
+        delete notificationMetadata[id]
         break
       }
     }
   }
 
-  // Auto-hide timer
+  // Optimized batch progress update
   Timer {
-    interval: 10
+    interval: 50 // Reduced from 10ms to 50ms (20 updates/sec instead of 100)
     repeat: true
     running: activeList.count > 0
-    onTriggered: {
-      const now = Date.now()
-      const durations = [Settings.data.notifications?.lowUrgencyDuration * 1000 || 3000, Settings.data.notifications?.normalUrgencyDuration * 1000 || 8000, Settings.data.notifications?.criticalUrgencyDuration * 1000 || 15000]
+    onTriggered: updateAllProgress()
+  }
 
-      for (var i = activeList.count - 1; i >= 0; i--) {
-        const notif = activeList.get(i)
-        const elapsed = now - notif.timestamp.getTime()
-        var expire = 0
+  function updateAllProgress() {
+    const now = Date.now()
+    const toRemove = []
+    const updates = [] // Batch updates
 
-        if (Settings.data.notifications?.respectExpireTimeout)
-        expire = notif.expireTimeout > 0 ? notif.expireTimeout : durations[notif.urgency]
-        else
-        expire = durations[notif.urgency]
+    // Collect all updates first
+    for (var i = 0; i < activeList.count; i++) {
+      const notif = activeList.get(i)
+      const meta = notificationMetadata[notif.id]
 
-        const progress = Math.max(1.0 - (elapsed / expire), 0.0)
-        updateModel(activeList, notif.id, "progress", progress)
+      if (!meta || meta.duration === -1)
+        continue
 
-        if (elapsed >= expire) {
-          animateAndRemove(notif.id)
-          delete progressTimers[notif.id]
-          break
-        }
+      // Skip infinite notifications
+      const elapsed = now - meta.timestamp
+      const progress = Math.max(1.0 - (elapsed / meta.duration), 0.0)
+
+      if (progress <= 0) {
+        toRemove.push(notif.id)
+      } else if (Math.abs(notif.progress - progress) > 0.005) {
+        // Only update if change is significant
+        updates.push({
+                       "index": i,
+                       "progress": progress
+                     })
       }
+    }
+
+    // Apply batch updates
+    for (const update of updates) {
+      activeList.setProperty(update.index, "progress", update.progress)
+    }
+
+    // Remove expired notifications (one at a time to allow animation)
+    if (toRemove.length > 0) {
+      animateAndRemove(toRemove[0])
     }
   }
 
@@ -262,7 +299,6 @@ Singleton {
         items.push(copy)
       }
       adapter.notifications = items
-      // Actually write the file
       historyFileView.writeAdapter()
     } catch (e) {
       Logger.error("Notifications", "Save history failed:", e)
@@ -275,10 +311,8 @@ Singleton {
       for (const item of adapter.notifications || []) {
         const time = new Date(item.timestamp)
 
-        // Check if we have a cached image and try to use it
         let cachedImage = item.cachedImage || ""
         if (item.originalImage && item.originalImage.startsWith("image://") && !cachedImage) {
-          // Try to generate the expected cached path
           const imageId = generateImageId(item, item.originalImage)
           if (imageId) {
             cachedImage = Settings.cacheDirImagesNotifications + imageId + ".png"
@@ -301,15 +335,54 @@ Singleton {
     }
   }
 
-  // Helpers
   function getAppName(name) {
-    if (!name?.includes("."))
-      return name || ""
-    const entries = DesktopEntries.byId(name)
-    if (entries?.length)
-      return entries[0].name || name
-    const parts = name.split(".")
-    return parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1)
+    if (!name || name.trim() === "")
+      return "Unknown"
+
+    name = name.trim()
+
+    if (name.includes(".") && (name.startsWith("com.") || name.startsWith("org.") || name.startsWith("io.") || name.startsWith("net."))) {
+      const parts = name.split(".")
+      let appPart = parts[parts.length - 1]
+
+      if (!appPart || appPart === "app" || appPart === "desktop") {
+        appPart = parts[parts.length - 2] || parts[0]
+      }
+
+      if (appPart) {
+        name = appPart
+      }
+    }
+
+    if (name.includes(".")) {
+      const parts = name.split(".")
+      let displayName = parts[parts.length - 1]
+
+      if (!displayName || /^\d+$/.test(displayName)) {
+        displayName = parts[parts.length - 2] || parts[0]
+      }
+
+      if (displayName) {
+        displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1)
+        displayName = displayName.replace(/([a-z])([A-Z])/g, '$1 $2')
+        displayName = displayName.replace(/app$/i, '').trim()
+        displayName = displayName.replace(/desktop$/i, '').trim()
+        displayName = displayName.replace(/flatpak$/i, '').trim()
+
+        if (!displayName) {
+          displayName = parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1)
+        }
+      }
+
+      return displayName || name
+    }
+
+    let displayName = name.charAt(0).toUpperCase() + name.slice(1)
+    displayName = displayName.replace(/([a-z])([A-Z])/g, '$1 $2')
+    displayName = displayName.replace(/app$/i, '').trim()
+    displayName = displayName.replace(/desktop$/i, '').trim()
+
+    return displayName || name
   }
 
   function getIcon(icon) {
@@ -326,13 +399,10 @@ Singleton {
 
   function generateImageId(notification, image) {
     if (image && image.startsWith("image://")) {
-      // For qsimage URLs, try to use a combination that's unique per user
       if (image.startsWith("image://qsimage/")) {
-        // Try to use app name + summary for uniqueness (summary often contains username)
         const key = (notification.appName || "") + "|" + (notification.summary || "")
         return Checksum.sha256(key)
       }
-
       return Checksum.sha256(image)
     }
     return ""
@@ -348,6 +418,7 @@ Singleton {
     Object.values(activeMap).forEach(n => n.dismiss())
     activeList.clear()
     activeMap = {}
+    notificationMetadata = {}
   }
 
   function invokeAction(id, actionId) {
@@ -368,7 +439,6 @@ Singleton {
     for (var i = 0; i < historyList.count; i++) {
       const notif = historyList.get(i)
       if (notif.id === notificationId) {
-        // Delete cached image if it exists
         if (notif.cachedImage && !notif.cachedImage.startsWith("image://")) {
           Quickshell.execDetached(["rm", "-f", notif.cachedImage])
         }
@@ -381,7 +451,6 @@ Singleton {
   }
 
   function clearHistory() {
-    // Remove all cached images
     try {
       Quickshell.execDetached(["sh", "-c", `rm -rf "${Settings.cacheDirImagesNotifications}"*`])
     } catch (e) {
@@ -399,7 +468,7 @@ Singleton {
     target: Settings.data.notifications
     function onDoNotDisturbChanged() {
       const enabled = Settings.data.notifications.doNotDisturb
-      ToastService.showNotice(enabled ? "'Do not disturb' enabled" : "'Do not disturb' disabled", enabled ? "You'll find these notifications in your history." : "Showing all notifications.")
+      ToastService.showNotice(enabled ? I18n.tr("toast.do-not-disturb.enabled") : I18n.tr("toast.do-not-disturb.disabled"), enabled ? I18n.tr("toast.do-not-disturb.enabled-desc") : I18n.tr("toast.do-not-disturb.disabled-desc"))
     }
   }
 }

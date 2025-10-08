@@ -30,9 +30,12 @@ Popup {
 
   property string query: ""
   property var allIcons: Object.keys(Icons.icons)
-  property var filteredIcons: allIcons.filter(function (name) {
-    return query === "" || name.toLowerCase().indexOf(query.toLowerCase()) !== -1
-  })
+  property var filteredIcons: {
+    if (query === "")
+      return allIcons
+    var q = query.toLowerCase()
+    return allIcons.filter(name => name.toLowerCase().includes(q))
+  }
   readonly property int columns: 6
   readonly property int cellW: Math.floor(grid.width / columns)
   readonly property int cellH: Math.round(cellW * 0.7 + 36 * scaling)
@@ -63,8 +66,8 @@ Popup {
     RowLayout {
       Layout.fillWidth: true
       NText {
-        text: "Icon picker"
-        font.pointSize: Style.fontSizeL * scaling
+        text: I18n.tr("widgets.icon-picker.title")
+        pointSize: Style.fontSizeL * scaling
         font.weight: Style.fontWeightBold
         color: Color.mPrimary
         Layout.fillWidth: true
@@ -85,75 +88,70 @@ Popup {
       NTextInput {
         id: searchInput
         Layout.fillWidth: true
-        label: "Search"
-        placeholderText: "e.g., noctalia, niri, battery, cloud"
+        label: I18n.tr("widgets.icon-picker.search.label")
+        placeholderText: I18n.tr("placeholders.search-icons")
         text: root.query
         onTextChanged: root.query = text.trim().toLowerCase()
       }
     }
 
     // Icon grid
-    NScrollView {
+    GridView {
+      id: grid
       Layout.fillWidth: true
       Layout.fillHeight: true
+      Layout.margins: Style.marginM * scaling
+      cellWidth: root.cellW
+      cellHeight: root.cellH
+      model: root.filteredIcons
       clip: true
-      horizontalPolicy: ScrollBar.AlwaysOff
-      verticalPolicy: ScrollBar.AlwaysOn
+      reuseItems: true
+      delegate: Rectangle {
+        width: grid.cellWidth
+        height: grid.cellHeight
+        radius: Style.radiusS * scaling
 
-      GridView {
-        id: grid
-        anchors.fill: parent
-        anchors.margins: Style.marginM * scaling
-        cellWidth: root.cellW
-        cellHeight: root.cellH
-        model: root.filteredIcons
-        delegate: Rectangle {
-          width: grid.cellWidth
-          height: grid.cellHeight
-          radius: Style.radiusS * scaling
-          clip: true
-          color: (root.selectedIcon === modelData) ? Qt.alpha(Color.mPrimary, 0.15) : "transparent"
-          border.color: (root.selectedIcon === modelData) ? Color.mPrimary : Qt.rgba(0, 0, 0, 0)
-          border.width: (root.selectedIcon === modelData) ? Style.borderS * scaling : 0
+        color: (root.selectedIcon === modelData) ? Qt.alpha(Color.mPrimary, 0.15) : Color.transparent
+        border.color: (root.selectedIcon === modelData) ? Color.mPrimary : Qt.rgba(0, 0, 0, 0)
+        border.width: (root.selectedIcon === modelData) ? Style.borderS * scaling : 0
 
-          MouseArea {
-            anchors.fill: parent
-            onClicked: root.selectedIcon = modelData
-            onDoubleClicked: {
-              root.selectedIcon = modelData
-              root.iconSelected(root.selectedIcon)
-              root.close()
-            }
+        MouseArea {
+          anchors.fill: parent
+          onClicked: root.selectedIcon = modelData
+          onDoubleClicked: {
+            root.selectedIcon = modelData
+            root.iconSelected(root.selectedIcon)
+            root.close()
           }
+        }
 
-          ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Style.marginS * scaling
-            spacing: Style.marginS * scaling
-            Item {
-              Layout.fillHeight: true
-              Layout.preferredHeight: 4 * scaling
-            }
-            NIcon {
-              Layout.alignment: Qt.AlignHCenter
-              icon: modelData
-              font.pointSize: 42 * scaling
-            }
-            NText {
-              Layout.alignment: Qt.AlignHCenter
-              Layout.fillWidth: true
-              Layout.topMargin: Style.marginXS * scaling
-              elide: Text.ElideRight
-              wrapMode: Text.NoWrap
-              maximumLineCount: 1
-              horizontalAlignment: Text.AlignHCenter
-              color: Color.mOnSurfaceVariant
-              font.pointSize: Style.fontSizeXS * scaling
-              text: modelData
-            }
-            Item {
-              Layout.fillHeight: true
-            }
+        ColumnLayout {
+          anchors.fill: parent
+          anchors.margins: Style.marginS * scaling
+          spacing: Style.marginS * scaling
+          Item {
+            Layout.fillHeight: true
+            Layout.preferredHeight: 4 * scaling
+          }
+          NIcon {
+            Layout.alignment: Qt.AlignHCenter
+            icon: modelData
+            pointSize: 42 * scaling
+          }
+          NText {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            Layout.topMargin: Style.marginXS * scaling
+            elide: Text.ElideRight
+            wrapMode: Text.NoWrap
+            maximumLineCount: 1
+            horizontalAlignment: Text.AlignHCenter
+            color: Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeXS * scaling
+            text: modelData
+          }
+          Item {
+            Layout.fillHeight: true
           }
         }
       }
@@ -166,12 +164,12 @@ Popup {
         Layout.fillWidth: true
       }
       NButton {
-        text: "Cancel"
+        text: I18n.tr("widgets.icon-picker.cancel")
         outlined: true
         onClicked: root.close()
       }
       NButton {
-        text: "Apply"
+        text: I18n.tr("widgets.icon-picker.apply")
         icon: "check"
         enabled: root.selectedIcon !== ""
         onClicked: {

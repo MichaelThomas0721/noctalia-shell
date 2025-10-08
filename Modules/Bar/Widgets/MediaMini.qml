@@ -33,13 +33,43 @@ Item {
   readonly property string barPosition: Settings.data.bar.position
   readonly property bool compact: (Settings.data.bar.density === "compact")
 
+  readonly property bool autoHide: (widgetSettings.autoHide !== undefined) ? widgetSettings.autoHide : widgetMetadata.autoHide
   readonly property bool showAlbumArt: (widgetSettings.showAlbumArt !== undefined) ? widgetSettings.showAlbumArt : widgetMetadata.showAlbumArt
   readonly property bool showVisualizer: (widgetSettings.showVisualizer !== undefined) ? widgetSettings.showVisualizer : widgetMetadata.showVisualizer
   readonly property string visualizerType: (widgetSettings.visualizerType !== undefined && widgetSettings.visualizerType !== "") ? widgetSettings.visualizerType : widgetMetadata.visualizerType
+  readonly property string scrollingMode: (widgetSettings.scrollingMode !== undefined) ? widgetSettings.scrollingMode : widgetMetadata.scrollingMode
 
-  // 6% of total width
-  readonly property real minWidth: Math.max(1, screen.width * 0.06)
-  readonly property real maxWidth: minWidth * 2
+  // Fixed width - no expansion
+  readonly property real widgetWidth: Math.max(145, screen.width * 0.06)
+
+  readonly property bool hasActivePlayer: MediaService.currentPlayer !== null && getTitle() !== ""
+  readonly property string placeholderText: I18n.tr("bar.widget-settings.media-mini.no-active-player")
+
+  readonly property string tooltipText: {
+    var title = getTitle()
+    var controls = ""
+    if (MediaService.canGoNext) {
+      controls += "Right click for next.\n"
+    }
+    if (MediaService.canGoPrevious) {
+      controls += "Middle click for previous."
+    }
+    if (controls !== "") {
+      return title + "\n\n" + controls
+    }
+    return title
+  }
+
+  implicitHeight: visible ? ((barPosition === "left" || barPosition === "right") ? calculatedVerticalHeight() : Math.round(Style.barHeight * scaling)) : 0
+  implicitWidth: visible ? ((barPosition === "left" || barPosition === "right") ? Math.round(Style.baseWidgetSize * 0.8 * scaling) : (widgetWidth * scaling)) : 0
+
+  opacity: !autoHide || hasActivePlayer || (!hasActivePlayer && !autoHide) ? 1.0 : 0
+  Behavior on opacity {
+    NumberAnimation {
+      duration: Style.animationNormal
+      easing.type: Easing.OutCubic
+    }
+  }
 
   function getTitle() {
     return MediaService.trackTitle + (MediaService.trackArtist !== "" ? ` - ${MediaService.trackArtist}` : "")
@@ -48,23 +78,6 @@ Item {
   function calculatedVerticalHeight() {
     return Math.round(Style.baseWidgetSize * 0.8 * scaling)
   }
-
-  function calculatedHorizontalWidth() {
-    let total = Style.marginM * 2 * scaling // internal padding
-    if (showAlbumArt) {
-      total += 18 * scaling + 2 * scaling // album art + spacing
-    } else {
-      total += Style.fontSizeL * scaling + 2 * scaling // icon + spacing
-    }
-    total += Math.min(fullTitleMetrics.contentWidth, maxWidth * scaling) // title text
-    // Row layout handles spacing between widgets
-    return total
-  }
-
-  implicitHeight: visible ? ((barPosition === "left" || barPosition === "right") ? calculatedVerticalHeight() : Math.round(Style.barHeight * scaling)) : 0
-  implicitWidth: visible ? ((barPosition === "left" || barPosition === "right") ? Math.round(Style.baseWidgetSize * 0.8 * scaling) : (rowLayout.implicitWidth + Style.marginM * 2 * scaling)) : 0
-
-  visible: MediaService.currentPlayer !== null && MediaService.canPlay
 
   //  A hidden text element to safely measure the full title width
   NText {
@@ -79,17 +92,10 @@ Item {
     visible: root.visible
     anchors.left: parent.left
     anchors.verticalCenter: parent.verticalCenter
-    width: (barPosition === "left" || barPosition === "right") ? Math.round(Style.baseWidgetSize * 0.8 * scaling) : (rowLayout.implicitWidth + Style.marginM * 2 * scaling)
+    width: (barPosition === "left" || barPosition === "right") ? Math.round(Style.baseWidgetSize * 0.8 * scaling) : (widgetWidth * scaling)
     height: (barPosition === "left" || barPosition === "right") ? Math.round(Style.baseWidgetSize * 0.8 * scaling) : Math.round(Style.capsuleHeight * scaling)
     radius: (barPosition === "left" || barPosition === "right") ? width / 2 : Math.round(Style.radiusM * scaling)
     color: Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent
-
-    // Used to anchor the tooltip, so the tooltip does not move when the content expands
-    Item {
-      id: anchor
-      height: parent.height
-      width: 200 * scaling
-    }
 
     Item {
       id: mainContainer
@@ -107,7 +113,7 @@ Item {
           width: mainContainer.width - Style.marginS * scaling
           height: 20 * scaling
           values: CavaService.values
-          fillColor: Color.mOnSurfaceVariant
+          fillColor: Color.mPrimary
           opacity: 0.4
         }
       }
@@ -122,7 +128,7 @@ Item {
           width: mainContainer.width - Style.marginS * scaling
           height: mainContainer.height - Style.marginS * scaling
           values: CavaService.values
-          fillColor: Color.mOnSurfaceVariant
+          fillColor: Color.mPrimary
           opacity: 0.4
         }
       }
@@ -137,7 +143,7 @@ Item {
           width: mainContainer.width - Style.marginS * scaling
           height: mainContainer.height - Style.marginS * scaling
           values: CavaService.values
-          fillColor: Color.mOnSurfaceVariant
+          fillColor: Color.mPrimary
           opacity: 0.4
         }
       }
@@ -145,28 +151,30 @@ Item {
       // Horizontal layout for top/bottom bars
       RowLayout {
         id: rowLayout
+
         anchors.verticalCenter: parent.verticalCenter
         spacing: Style.marginS * scaling
-        visible: barPosition === "top" || barPosition === "bottom"
+        visible: (barPosition === "top" || barPosition === "bottom")
         z: 1 // Above the visualizer
 
         NIcon {
           id: windowIcon
-          icon: MediaService.isPlaying ? "media-pause" : "media-play"
-          font.pointSize: Style.fontSizeL * scaling
+          icon: hasActivePlayer ? (MediaService.isPlaying ? "media-pause" : "media-play") : "disc"
+          color: hasActivePlayer ? Color.mOnSurface : Color.mOnSurfaceVariant
+          pointSize: Style.fontSizeL * scaling
           verticalAlignment: Text.AlignVCenter
           Layout.alignment: Qt.AlignVCenter
-          visible: !showAlbumArt && getTitle() !== "" && !trackArt.visible
+          visible: !hasActivePlayer || (!showAlbumArt && !trackArt.visible)
         }
 
         ColumnLayout {
           Layout.alignment: Qt.AlignVCenter
-          visible: showAlbumArt
+          visible: showAlbumArt && hasActivePlayer
           spacing: 0
 
           Item {
-            Layout.preferredWidth: Math.round(18 * scaling)
-            Layout.preferredHeight: Math.round(18 * scaling)
+            Layout.preferredWidth: Math.round(21 * scaling)
+            Layout.preferredHeight: Math.round(21 * scaling)
 
             NImageCircled {
               id: trackArt
@@ -180,24 +188,143 @@ Item {
           }
         }
 
-        NText {
-          id: titleText
-
+        Item {
+          id: titleContainer
           Layout.preferredWidth: {
-            if (mouseArea.containsMouse) {
-              return Math.round(Math.min(fullTitleMetrics.contentWidth, root.maxWidth * scaling))
-            } else {
-              return Math.round(Math.min(fullTitleMetrics.contentWidth, root.minWidth * scaling))
+            // Calculate available width based on other elements in the row
+            var iconWidth = (windowIcon.visible ? (Style.fontSizeL * scaling + Style.marginS * scaling) : 0)
+            var albumArtWidth = (hasActivePlayer && showAlbumArt ? (18 * scaling + Style.marginS * scaling) : 0)
+            var totalMargins = Style.marginXXS * scaling * 2
+            var availableWidth = mainContainer.width - iconWidth - albumArtWidth - totalMargins
+            return Math.max(20 * scaling, availableWidth)
+          }
+          Layout.maximumWidth: Layout.preferredWidth
+          Layout.alignment: Qt.AlignVCenter
+          Layout.preferredHeight: titleText.height
+
+          clip: true
+
+          property bool isScrolling: false
+          property bool isResetting: false
+          property real textWidth: fullTitleMetrics.contentWidth
+          property real containerWidth: 0
+          property bool needsScrolling: textWidth > containerWidth && MediaService.isPlaying
+
+          // Timer for "always" mode with delay
+          Timer {
+            id: scrollStartTimer
+            interval: 1000
+            repeat: false
+            onTriggered: {
+              if (scrollingMode === "always" && titleContainer.needsScrolling) {
+                titleContainer.isScrolling = true
+                titleContainer.isResetting = false
+              }
             }
           }
-          Layout.alignment: Qt.AlignVCenter
 
-          text: getTitle()
-          font.pointSize: Style.fontSizeS * scaling
-          font.weight: Style.fontWeightMedium
-          elide: Text.ElideRight
-          verticalAlignment: Text.AlignVCenter
-          color: Color.mSecondary
+          // Update scrolling state based on mode
+          property var updateScrollingState: function () {
+            if (scrollingMode === "never") {
+              isScrolling = false
+              isResetting = false
+            } else if (scrollingMode === "always") {
+              if (needsScrolling) {
+                if (mouseArea.containsMouse) {
+                  isScrolling = false
+                  isResetting = true
+                } else {
+                  scrollStartTimer.restart()
+                }
+              } else {
+                scrollStartTimer.stop()
+                isScrolling = false
+                isResetting = false
+              }
+            } else if (scrollingMode === "hover") {
+              if (mouseArea.containsMouse && needsScrolling) {
+                isScrolling = true
+                isResetting = false
+              } else {
+                isScrolling = false
+                if (needsScrolling) {
+                  isResetting = true
+                }
+              }
+            }
+          }
+
+          onWidthChanged: {
+            containerWidth = width
+            updateScrollingState()
+          }
+
+          Component.onCompleted: {
+            containerWidth = width
+            updateScrollingState()
+          }
+
+          Connections {
+            target: mouseArea
+            function onContainsMouseChanged() {
+              titleContainer.updateScrollingState()
+            }
+          }
+
+          // Scrolling content
+          Item {
+            id: scrollContainer
+            height: parent.height
+            width: parent.width
+
+            property real scrollX: 0
+            x: scrollX
+
+            RowLayout {
+              spacing: 50 * scaling // Gap between text copies
+
+              NText {
+                id: titleText
+                text: hasActivePlayer ? getTitle() : placeholderText
+                pointSize: Style.fontSizeS * scaling
+                font.weight: Style.fontWeightMedium
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: hasActivePlayer ? Text.AlignLeft : Text.AlignHCenter
+                color: hasActivePlayer ? Color.mOnSurface : Color.mOnSurfaceVariant
+              }
+
+              NText {
+                text: hasActivePlayer ? getTitle() : placeholderText
+                font: titleText.font
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: hasActivePlayer ? Text.AlignLeft : Text.AlignHCenter
+                color: hasActivePlayer ? Color.mOnSurface : Color.mOnSurfaceVariant
+                visible: hasActivePlayer && titleContainer.needsScrolling && titleContainer.isScrolling
+              }
+            }
+
+            // Reset animation
+            NumberAnimation on scrollX {
+              running: titleContainer.isResetting
+              to: 0
+              duration: 300
+              easing.type: Easing.OutQuad
+              onFinished: {
+                titleContainer.isResetting = false
+              }
+            }
+
+            // Seamless infinite scroll
+            NumberAnimation on scrollX {
+              id: infiniteScroll
+              running: titleContainer.isScrolling && !titleContainer.isResetting
+              from: 0
+              to: -(titleContainer.textWidth + 50 * scaling) // Scroll one complete text width + gap
+              duration: Math.max(4000, getTitle().length * 120)
+              loops: Animation.Infinite
+              easing.type: Easing.Linear
+            }
+          }
 
           Behavior on Layout.preferredWidth {
             NumberAnimation {
@@ -222,13 +349,13 @@ Item {
           width: Style.baseWidgetSize * 0.5 * scaling
           height: Style.baseWidgetSize * 0.5 * scaling
           anchors.centerIn: parent
-          visible: getTitle() !== ""
 
           NIcon {
             id: mediaIconVertical
             anchors.fill: parent
-            icon: MediaService.isPlaying ? "media-pause" : "media-play"
-            font.pointSize: Style.fontSizeL * scaling
+            icon: hasActivePlayer ? (MediaService.isPlaying ? "media-pause" : "media-play") : "disc"
+            color: hasActivePlayer ? Color.mOnSurface : Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeL * scaling
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
           }
@@ -240,60 +367,34 @@ Item {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: hasActivePlayer ? Qt.PointingHandCursor : Qt.ArrowCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onClicked: mouse => {
+                     if (!hasActivePlayer || !MediaService.currentPlayer || !MediaService.canPlay) {
+                       return
+                     }
+
                      if (mouse.button === Qt.LeftButton) {
                        MediaService.playPause()
                      } else if (mouse.button == Qt.RightButton) {
                        MediaService.next()
-                       // Need to hide the tooltip instantly
-                       tooltip.visible = false
+                       TooltipService.hide()
                      } else if (mouse.button == Qt.MiddleButton) {
                        MediaService.previous()
-                       // Need to hide the tooltip instantly
-                       tooltip.visible = false
+                       TooltipService.hide()
                      }
                    }
 
         onEntered: {
-          if (barPosition === "left" || barPosition === "right") {
-            tooltip.show()
-          } else if (tooltip.text !== "") {
-            tooltip.show()
+          var textToShow = hasActivePlayer ? tooltipText : placeholderText
+          if ((textToShow !== "") && (barPosition === "left" || barPosition === "right") || (scrollingMode === "never")) {
+            TooltipService.show(Screen, root, textToShow, BarService.getTooltipDirection())
           }
         }
         onExited: {
-          if (barPosition === "left" || barPosition === "right") {
-            tooltip.hide()
-          } else {
-            tooltip.hide()
-          }
+          TooltipService.hide()
         }
       }
     }
-  }
-
-  NTooltip {
-    id: tooltip
-    text: {
-      if (barPosition === "left" || barPosition === "right") {
-        return getTitle()
-      } else {
-        var str = ""
-        if (MediaService.canGoNext) {
-          str += "Right click for next.\n"
-        }
-        if (MediaService.canGoPrevious) {
-          str += "Middle click for previous."
-        }
-        return str
-      }
-    }
-    target: (barPosition === "left" || barPosition === "right") ? verticalLayout : anchor
-    positionLeft: barPosition === "right"
-    positionRight: barPosition === "left"
-    positionAbove: Settings.data.bar.position === "bottom"
-    delay: 500
   }
 }

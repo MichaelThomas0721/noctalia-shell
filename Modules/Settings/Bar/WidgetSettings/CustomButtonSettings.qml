@@ -30,19 +30,19 @@ ColumnLayout {
     spacing: Style.marginM * scaling
 
     NLabel {
-      label: "Icon"
-      description: "Select an icon from the library."
+      label: I18n.tr("bar.widget-settings.custom-button.icon.label")
+      description: I18n.tr("bar.widget-settings.custom-button.icon.description")
     }
 
     NIcon {
       Layout.alignment: Qt.AlignVCenter
       icon: valueIcon
-      font.pointSize: Style.fontSizeXL * scaling
+      pointSize: Style.fontSizeXL * scaling
       visible: valueIcon !== ""
     }
 
     NButton {
-      text: "Browse"
+      text: I18n.tr("bar.widget-settings.custom-button.browse")
       onClicked: iconPicker.open()
     }
   }
@@ -58,24 +58,27 @@ ColumnLayout {
   NTextInput {
     id: leftClickExecInput
     Layout.fillWidth: true
-    label: "Left click"
-    placeholderText: "Enter command to execute (app or custom script)"
+    label: I18n.tr("bar.widget-settings.custom-button.left-click.label")
+    description: I18n.tr("bar.widget-settings.custom-button.left-click.description")
+    placeholderText: I18n.tr("placeholders.enter-command")
     text: widgetData?.leftClickExec || widgetMetadata.leftClickExec
   }
 
   NTextInput {
     id: rightClickExecInput
     Layout.fillWidth: true
-    label: "Right click"
-    placeholderText: "Enter command to execute (app or custom script)"
+    label: I18n.tr("bar.widget-settings.custom-button.right-click.label")
+    description: I18n.tr("bar.widget-settings.custom-button.right-click.description")
+    placeholderText: I18n.tr("placeholders.enter-command")
     text: widgetData?.rightClickExec || widgetMetadata.rightClickExec
   }
 
   NTextInput {
     id: middleClickExecInput
     Layout.fillWidth: true
-    label: "Middle click"
-    placeholderText: "Enter command to execute (app or custom script)"
+    label: I18n.tr("bar.widget-settings.custom-button.middle-click.label")
+    description: I18n.tr("bar.widget-settings.custom-button.middle-click.description")
+    placeholderText: I18n.tr("placeholders.enter-command")
     text: widgetData.middleClickExec || widgetMetadata.middleClickExec
   }
 
@@ -84,23 +87,23 @@ ColumnLayout {
   }
 
   NHeader {
-    label: "Dynamic text"
+    label: I18n.tr("bar.widget-settings.custom-button.dynamic-text")
   }
 
   NTextInput {
     id: textCommandInput
     Layout.fillWidth: true
-    label: "Display Command Output"
-    description: "Enter a command to run at a regular interval. The first line of its output will be displayed as text."
-    placeholderText: "echo \"Hello World\""
+    label: I18n.tr("bar.widget-settings.custom-button.display-command-output.label")
+    description: I18n.tr("bar.widget-settings.custom-button.display-command-output.description")
+    placeholderText: I18n.tr("placeholders.command-example")
     text: widgetData?.textCommand || widgetMetadata.textCommand
   }
 
   NTextInput {
     id: textIntervalInput
     Layout.fillWidth: true
-    label: "Refresh interval"
-    description: "Interval in milliseconds."
+    label: I18n.tr("bar.widget-settings.custom-button.refresh-interval.label")
+    description: I18n.tr("bar.widget-settings.custom-button.refresh-interval.description")
     placeholderText: String(widgetMetadata.textIntervalMs || 3000)
     text: widgetData && widgetData.textIntervalMs !== undefined ? String(widgetData.textIntervalMs) : ""
   }

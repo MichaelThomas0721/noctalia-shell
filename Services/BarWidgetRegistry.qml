@@ -40,7 +40,10 @@ Singleton {
   property var widgetMetadata: ({
                                   "ActiveWindow": {
                                     "allowUserSettings": true,
-                                    "showIcon": true
+                                    "showIcon": true,
+                                    "autoHide": false,
+                                    "scrollingMode": "hover",
+                                    "width": 145
                                   },
                                   "Battery": {
                                     "allowUserSettings": true,
@@ -54,9 +57,16 @@ Singleton {
                                   "Clock": {
                                     "allowUserSettings": true,
                                     "usePrimaryColor": true,
-                                    "useMonospacedFont": true,
+                                    "useCustomFont": false,
+                                    "customFont": "",
                                     "formatHorizontal": "HH:mm ddd, MMM dd",
                                     "formatVertical": "HH mm - dd MM"
+                                  },
+                                  "ControlCenter": {
+                                    "allowUserSettings": true,
+                                    "useDistroLogo": false,
+                                    "icon": "noctalia",
+                                    "customIconPath": ""
                                   },
                                   "CustomButton": {
                                     "allowUserSettings": true,
@@ -66,6 +76,18 @@ Singleton {
                                     "middleClickExec": "",
                                     "textCommand": "",
                                     "textIntervalMs": 3000
+                                  },
+                                  "KeyboardLayout": {
+                                    "allowUserSettings": true,
+                                    "displayMode": "onhover"
+                                  },
+                                  "MediaMini": {
+                                    "allowUserSettings": true,
+                                    "autoHide": false,
+                                    "scrollingMode": "hover",
+                                    "showAlbumArt": false,
+                                    "showVisualizer": false,
+                                    "visualizerType": "linear"
                                   },
                                   "Microphone": {
                                     "allowUserSettings": true,
@@ -89,28 +111,17 @@ Singleton {
                                     "showNetworkStats": false,
                                     "showDiskUsage": false
                                   },
+                                  "Taskbar": {
+                                    "allowUserSettings": true,
+                                    "onlySameOutput": true,
+                                    "onlyActiveWorkspaces": true
+                                  },
                                   "Workspace": {
                                     "allowUserSettings": true,
                                     "labelMode": "index",
                                     "hideUnoccupied": false
                                   },
-                                  "MediaMini": {
-                                    "allowUserSettings": true,
-                                    "showAlbumArt": false,
-                                    "showVisualizer": false,
-                                    "visualizerType": "linear"
-                                  },
-                                  "ControlCenter": {
-                                    "allowUserSettings": true,
-                                    "useDistroLogo": false,
-                                    "icon": "noctalia",
-                                    "customIconPath": ""
-                                  },
                                   "Volume": {
-                                    "allowUserSettings": true,
-                                    "displayMode": "onhover"
-                                  },
-                                  "KeyboardLayout": {
                                     "allowUserSettings": true,
                                     "displayMode": "onhover"
                                   }
@@ -191,6 +202,10 @@ Singleton {
   }
   property Component taskbarComponent: Component {
     Taskbar {}
+  }
+
+  function init() {
+    Logger.log("BarWidgetRegistry", "Service started")
   }
 
   // ------------------------------

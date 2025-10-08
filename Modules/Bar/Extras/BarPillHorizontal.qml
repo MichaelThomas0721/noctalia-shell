@@ -1,11 +1,14 @@
 import QtQuick
 import QtQuick.Controls
+import Quickshell
 import qs.Commons
 import qs.Services
 import qs.Widgets
 
 Item {
   id: root
+
+  property ShellScreen screen
 
   property string icon: ""
   property string text: ""
@@ -20,7 +23,7 @@ Item {
   property bool compact: false
 
   // Effective shown state (true if hovered/animated open or forced)
-  readonly property bool revealed: forceOpen || showPill
+  readonly property bool revealed: !forceClose && (forceOpen || showPill)
 
   signal shown
   signal hidden
@@ -46,8 +49,16 @@ Item {
   width: pillHeight + Math.max(0, pill.width - pillOverlap)
   height: pillHeight
 
+  Connections {
+    target: root
+    function onTooltipTextChanged() {
+      TooltipService.updateText(root.tooltipText)
+    }
+  }
+
   Rectangle {
     id: pill
+
     width: revealed ? pillMaxWidth : 1
     height: pillHeight
 
@@ -77,8 +88,8 @@ Item {
         return centerX + offset
       }
       text: root.text + root.suffix
-      font.family: Settings.data.ui.fontFixed
-      font.pointSize: textSize
+      family: Settings.data.ui.fontFixed
+      pointSize: textSize
       font.weight: Style.fontWeightBold
       color: forceOpen ? Color.mOnSurface : Color.mPrimary
       visible: revealed
@@ -119,7 +130,7 @@ Item {
 
     NIcon {
       icon: root.icon
-      font.pointSize: iconSize
+      pointSize: iconSize
       color: hovered ? Color.mOnTertiary : Color.mOnSurface
       // Center horizontally
       x: (iconCircle.width - width) / 2
@@ -195,14 +206,6 @@ Item {
     }
   }
 
-  NTooltip {
-    id: tooltip
-    positionAbove: Settings.data.bar.position === "bottom"
-    target: pill
-    delay: Style.tooltipDelayLong
-    text: root.tooltipText
-  }
-
   Timer {
     id: showTimer
     interval: Style.pillDelay
@@ -220,8 +223,8 @@ Item {
     onEntered: {
       hovered = true
       root.entered()
-      tooltip.show()
-      if (disableOpen) {
+      TooltipService.show(Screen, pill, root.tooltipText, BarService.getTooltipDirection(), Style.tooltipDelayLong)
+      if (disableOpen || forceClose) {
         return
       }
       if (!forceOpen) {
@@ -231,10 +234,10 @@ Item {
     onExited: {
       hovered = false
       root.exited()
-      if (!forceOpen) {
+      if (!forceOpen && !forceClose) {
         hide()
       }
-      tooltip.hide()
+      TooltipService.hide()
     }
     onClicked: function (mouse) {
       if (mouse.button === Qt.LeftButton) {

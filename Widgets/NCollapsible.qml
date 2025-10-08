@@ -21,7 +21,7 @@ ColumnLayout {
   Rectangle {
     id: headerContainer
     Layout.fillWidth: true
-    Layout.preferredHeight: headerContent.implicitHeight + (Style.marginL * scaling * 2)
+    Layout.preferredHeight: headerContent.implicitHeight + (Style.marginM * scaling * 2)
 
     // Material 3 style background
     color: root.expanded ? Color.mSecondary : Color.mSurfaceVariant
@@ -75,14 +75,14 @@ ColumnLayout {
     RowLayout {
       id: headerContent
       anchors.fill: parent
-      anchors.margins: Style.marginL * scaling
+      anchors.margins: Style.marginM * scaling
       spacing: Style.marginM * scaling
 
       // Expand/collapse icon with rotation animation
       NIcon {
         id: chevronIcon
         icon: "chevron-right"
-        font.pointSize: Style.fontSizeL * scaling
+        pointSize: Style.fontSizeL * scaling
         color: root.expanded ? Color.mOnSecondary : Color.mOnSurfaceVariant
         Layout.alignment: Qt.AlignVCenter
 
@@ -102,17 +102,16 @@ ColumnLayout {
       }
 
       // Header text content - properly contained
-      ColumnLayout {
+      RowLayout {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
-        spacing: Style.marginXXS * scaling
+        spacing: Style.marginL * scaling
 
         NText {
           text: root.label
-          font.pointSize: Style.fontSizeL * scaling
+          pointSize: Style.fontSizeL * scaling
           font.weight: Style.fontWeightSemiBold
           color: root.expanded ? Color.mOnSecondary : Color.mOnSurface
-          Layout.fillWidth: true
           wrapMode: Text.WordWrap
 
           Behavior on color {
@@ -124,7 +123,7 @@ ColumnLayout {
 
         NText {
           text: root.description
-          font.pointSize: Style.fontSizeS * scaling
+          pointSize: Style.fontSizeS * scaling
           font.weight: Style.fontWeightRegular
           color: root.expanded ? Color.mOnSecondary : Color.mOnSurfaceVariant
           Layout.fillWidth: true
@@ -171,9 +170,6 @@ ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL * scaling
       spacing: root.contentSpacing
-
-      // Clip content during animation
-      clip: true
     }
 
     // Fade in animation for content

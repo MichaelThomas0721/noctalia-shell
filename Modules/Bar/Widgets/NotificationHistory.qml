@@ -10,7 +10,6 @@ import qs.Widgets
 NIconButton {
   id: root
 
-  property ShellScreen screen
   property real scaling: 1.0
 
   // Widget properties passed from Bar.qml for per-instance settings
@@ -52,7 +51,8 @@ NIconButton {
   baseSize: Style.capsuleHeight
   compact: (Settings.data.bar.density === "compact")
   icon: Settings.data.notifications.doNotDisturb ? "bell-off" : "bell"
-  tooltipText: `Open notification history\nRight-click to ${Settings.data.notifications.doNotDisturb ? "disable" : "enable"} "Do not disturb".`
+  tooltipText: Settings.data.notifications.doNotDisturb ? I18n.tr("tooltips.open-notification-history-disable-dnd") : I18n.tr("tooltips.open-notification-history-enable-dnd")
+  tooltipDirection: BarService.getTooltipDirection()
   colorBg: (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent)
   colorFg: Color.mOnSurface
   colorBorder: Color.transparent
@@ -61,7 +61,6 @@ NIconButton {
   onClicked: {
     var panel = PanelService.getPanel("notificationHistoryPanel")
     panel?.toggle(this)
-    Settings.data.notifications.lastSeenTs = Time.timestamp * 1000
   }
 
   onRightClicked: Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb

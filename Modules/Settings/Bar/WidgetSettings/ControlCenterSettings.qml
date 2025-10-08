@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
 import qs.Commons
 import qs.Widgets
 import qs.Services
@@ -27,7 +28,8 @@ ColumnLayout {
   }
 
   NToggle {
-    label: "Use distro logo instead of icon"
+    label: I18n.tr("bar.widget-settings.control-center.use-distro-logo.label")
+    description: I18n.tr("bar.widget-settings.control-center.use-distro-logo.description")
     checked: valueUseDistroLogo
     onToggled: {
       valueUseDistroLogo = checked
@@ -42,8 +44,8 @@ ColumnLayout {
     spacing: Style.marginM * scaling
 
     NLabel {
-      label: "Icon"
-      description: "Select an icon from the library or a custom file."
+      label: I18n.tr("bar.widget-settings.control-center.icon.label")
+      description: I18n.tr("bar.widget-settings.control-center.icon.description")
     }
 
     NImageCircled {
@@ -57,7 +59,7 @@ ColumnLayout {
     NIcon {
       Layout.alignment: Qt.AlignVCenter
       icon: valueIcon
-      font.pointSize: Style.fontSizeXXL * 1.5 * scaling
+      pointSize: Style.fontSizeXXL * 1.5 * scaling
       visible: valueIcon !== "" && valueCustomIconPath === ""
     }
   }
@@ -66,14 +68,14 @@ ColumnLayout {
     spacing: Style.marginM * scaling
     NButton {
       enabled: !valueUseDistroLogo
-      text: "Browse Library"
+      text: I18n.tr("bar.widget-settings.control-center.browse-library")
       onClicked: iconPicker.open()
     }
 
     NButton {
       enabled: !valueUseDistroLogo
-      text: "Browse File"
-      onClicked: filePicker.open()
+      text: I18n.tr("bar.widget-settings.control-center.browse-file")
+      onClicked: imagePicker.openFilePicker()
     }
   }
 
@@ -87,8 +89,15 @@ ColumnLayout {
   }
 
   NFilePicker {
-    id: filePicker
-    title: "Select a custom icon"
-    onAccepted: paths => valueCustomIconPath = paths[0]
+    id: imagePicker
+    title: I18n.tr("bar.widget-settings.control-center.select-custom-icon")
+    selectionMode: "files"
+    nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.pnm", "*.bmp"]
+    initialPath: Quickshell.env("HOME")
+    onAccepted: paths => {
+                  if (paths.length > 0) {
+                    valueCustomIconPath = paths[0] // Use first selected file
+                  }
+                }
   }
 }

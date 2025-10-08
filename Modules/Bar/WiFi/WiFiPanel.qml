@@ -35,13 +35,13 @@ NPanel {
 
         NIcon {
           icon: Settings.data.network.wifiEnabled ? "wifi" : "wifi-off"
-          font.pointSize: Style.fontSizeXXL * scaling
+          pointSize: Style.fontSizeXXL * scaling
           color: Settings.data.network.wifiEnabled ? Color.mPrimary : Color.mOnSurfaceVariant
         }
 
         NText {
-          text: "Wi-Fi"
-          font.pointSize: Style.fontSizeL * scaling
+          text: I18n.tr("wifi.panel.title")
+          pointSize: Style.fontSizeL * scaling
           font.weight: Style.fontWeightBold
           color: Color.mOnSurface
           Layout.fillWidth: true
@@ -56,7 +56,7 @@ NPanel {
 
         NIconButton {
           icon: "refresh"
-          tooltipText: "Refresh"
+          tooltipText: I18n.tr("tooltips.refresh")
           baseSize: Style.baseWidgetSize * 0.8
           enabled: Settings.data.network.wifiEnabled && !NetworkService.scanning
           onClicked: NetworkService.scan()
@@ -64,7 +64,7 @@ NPanel {
 
         NIconButton {
           icon: "close"
-          tooltipText: "Close"
+          tooltipText: I18n.tr("tooltips.close")
           baseSize: Style.baseWidgetSize * 0.8
           onClicked: root.close()
         }
@@ -92,14 +92,14 @@ NPanel {
 
           NIcon {
             icon: "warning"
-            font.pointSize: Style.fontSizeL * scaling
+            pointSize: Style.fontSizeL * scaling
             color: Color.mError
           }
 
           NText {
             text: NetworkService.lastError
             color: Color.mError
-            font.pointSize: Style.fontSizeS * scaling
+            pointSize: Style.fontSizeS * scaling
             wrapMode: Text.Wrap
             Layout.fillWidth: true
           }
@@ -130,21 +130,21 @@ NPanel {
 
           NIcon {
             icon: "wifi-off"
-            font.pointSize: 64 * scaling
+            pointSize: 64 * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
-            text: "Wi-Fi is disabled"
-            font.pointSize: Style.fontSizeL * scaling
+            text: I18n.tr("wifi.panel.disabled")
+            pointSize: Style.fontSizeL * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
-            text: "Enable Wi-Fi to see available networks."
-            font.pointSize: Style.fontSizeS * scaling
+            text: I18n.tr("wifi.panel.enable-message")
+            pointSize: Style.fontSizeS * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
@@ -172,8 +172,8 @@ NPanel {
           }
 
           NText {
-            text: "Searching for nearby networks..."
-            font.pointSize: Style.fontSizeNormal * scaling
+            text: I18n.tr("wifi.panel.searching")
+            pointSize: Style.fontSizeNormal * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
@@ -242,7 +242,7 @@ NPanel {
 
                     NIcon {
                       icon: NetworkService.signalIcon(modelData.signal)
-                      font.pointSize: Style.fontSizeXXL * scaling
+                      pointSize: Style.fontSizeXXL * scaling
                       color: modelData.connected ? Color.mPrimary : Color.mOnSurface
                     }
 
@@ -252,7 +252,7 @@ NPanel {
 
                       NText {
                         text: modelData.ssid
-                        font.pointSize: Style.fontSizeNormal * scaling
+                        pointSize: Style.fontSizeNormal * scaling
                         font.weight: modelData.connected ? Style.fontWeightBold : Style.fontWeightMedium
                         color: Color.mOnSurface
                         elide: Text.ElideRight
@@ -263,20 +263,22 @@ NPanel {
                         spacing: Style.marginXS * scaling
 
                         NText {
-                          text: `${modelData.signal}%`
-                          font.pointSize: Style.fontSizeXXS * scaling
+                          text: I18n.tr("system.signal-strength", {
+                                          "signal": modelData.signal
+                                        })
+                          pointSize: Style.fontSizeXXS * scaling
                           color: Color.mOnSurfaceVariant
                         }
 
                         NText {
                           text: "•"
-                          font.pointSize: Style.fontSizeXXS * scaling
+                          pointSize: Style.fontSizeXXS * scaling
                           color: Color.mOnSurfaceVariant
                         }
 
                         NText {
                           text: NetworkService.isSecured(modelData.security) ? modelData.security : "Open"
-                          font.pointSize: Style.fontSizeXXS * scaling
+                          pointSize: Style.fontSizeXXS * scaling
                           color: Color.mOnSurfaceVariant
                         }
 
@@ -295,8 +297,8 @@ NPanel {
                           NText {
                             id: connectedText
                             anchors.centerIn: parent
-                            text: "Connected"
-                            font.pointSize: Style.fontSizeXXS * scaling
+                            text: I18n.tr("wifi.panel.connected")
+                            pointSize: Style.fontSizeXXS * scaling
                             color: Color.mOnPrimary
                           }
                         }
@@ -311,8 +313,8 @@ NPanel {
                           NText {
                             id: disconnectingText
                             anchors.centerIn: parent
-                            text: "Disconnecting..."
-                            font.pointSize: Style.fontSizeXXS * scaling
+                            text: I18n.tr("wifi.panel.disconnecting")
+                            pointSize: Style.fontSizeXXS * scaling
                             color: Color.mOnPrimary
                           }
                         }
@@ -327,8 +329,8 @@ NPanel {
                           NText {
                             id: forgettingText
                             anchors.centerIn: parent
-                            text: "Forgetting..."
-                            font.pointSize: Style.fontSizeXXS * scaling
+                            text: I18n.tr("wifi.panel.forgetting")
+                            pointSize: Style.fontSizeXXS * scaling
                             color: Color.mOnPrimary
                           }
                         }
@@ -345,8 +347,8 @@ NPanel {
                           NText {
                             id: savedText
                             anchors.centerIn: parent
-                            text: "Saved"
-                            font.pointSize: Style.fontSizeXXS * scaling
+                            text: I18n.tr("wifi.panel.saved")
+                            pointSize: Style.fontSizeXXS * scaling
                             color: Color.mOnSurfaceVariant
                           }
                         }
@@ -367,7 +369,7 @@ NPanel {
                       NIconButton {
                         visible: (modelData.existing || modelData.cached) && !modelData.connected && NetworkService.connectingTo !== modelData.ssid && NetworkService.forgettingNetwork !== modelData.ssid && NetworkService.disconnectingFrom !== modelData.ssid
                         icon: "trash"
-                        tooltipText: "Forget network"
+                        tooltipText: I18n.tr("tooltips.forget-network")
                         baseSize: Style.baseWidgetSize * 0.8
                         onClicked: expandedSsid = expandedSsid === modelData.ssid ? "" : modelData.ssid
                       }
@@ -376,10 +378,10 @@ NPanel {
                         visible: !modelData.connected && NetworkService.connectingTo !== modelData.ssid && passwordSsid !== modelData.ssid && NetworkService.forgettingNetwork !== modelData.ssid && NetworkService.disconnectingFrom !== modelData.ssid
                         text: {
                           if (modelData.existing || modelData.cached)
-                            return "Connect"
+                            return I18n.tr("wifi.panel.connect")
                           if (!NetworkService.isSecured(modelData.security))
-                            return "Connect"
-                          return "Password"
+                            return I18n.tr("wifi.panel.connect")
+                          return I18n.tr("wifi.panel.password")
                         }
                         outlined: !hovered
                         fontSize: Style.fontSizeXS * scaling
@@ -397,7 +399,7 @@ NPanel {
 
                       NButton {
                         visible: modelData.connected && NetworkService.disconnectingFrom !== modelData.ssid
-                        text: "Disconnect"
+                        text: I18n.tr("wifi.panel.disconnect")
                         outlined: !hovered
                         fontSize: Style.fontSizeXS * scaling
                         backgroundColor: Color.mError
@@ -437,6 +439,7 @@ NPanel {
                           anchors.verticalCenter: parent.verticalCenter
                           anchors.margins: Style.marginS * scaling
                           text: passwordInput
+                          font.family: Settings.data.ui.fontFixed
                           font.pointSize: Style.fontSizeS * scaling
                           color: Color.mOnSurface
                           echoMode: TextInput.Password
@@ -454,18 +457,18 @@ NPanel {
                             }
                           }
 
-                          Text {
+                          NText {
                             visible: parent.text.length === 0
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Enter password..."
+                            text: I18n.tr("wifi.panel.enter-password")
                             color: Color.mOnSurfaceVariant
-                            font.pointSize: Style.fontSizeS * scaling
+                            pointSize: Style.fontSizeS * scaling
                           }
                         }
                       }
 
                       NButton {
-                        text: "Connect"
+                        text: I18n.tr("wifi.panel.connect")
                         fontSize: Style.fontSizeXXS * scaling
                         enabled: passwordInput.length > 0 && !NetworkService.connecting
                         outlined: true
@@ -506,13 +509,13 @@ NPanel {
                       RowLayout {
                         NIcon {
                           icon: "trash"
-                          font.pointSize: Style.fontSizeL * scaling
+                          pointSize: Style.fontSizeL * scaling
                           color: Color.mError
                         }
 
                         NText {
-                          text: "Forget this network?"
-                          font.pointSize: Style.fontSizeS * scaling
+                          text: I18n.tr("wifi.panel.forget-network")
+                          pointSize: Style.fontSizeS * scaling
                           color: Color.mError
                           Layout.fillWidth: true
                         }
@@ -520,7 +523,7 @@ NPanel {
 
                       NButton {
                         id: forgetButton
-                        text: "Forget"
+                        text: I18n.tr("wifi.panel.forget")
                         fontSize: Style.fontSizeXXS * scaling
                         backgroundColor: Color.mError
                         outlined: forgetButton.hovered ? false : true
@@ -555,20 +558,20 @@ NPanel {
 
           NIcon {
             icon: "search"
-            font.pointSize: 64 * scaling
+            pointSize: 64 * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
-            text: "No networks found"
-            font.pointSize: Style.fontSizeL * scaling
+            text: I18n.tr("wifi.panel.no-networks")
+            pointSize: Style.fontSizeL * scaling
             color: Color.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NButton {
-            text: "Scan again"
+            text: I18n.tr("wifi.panel.scan-again")
             icon: "refresh"
             Layout.alignment: Qt.AlignHCenter
             onClicked: NetworkService.scan()

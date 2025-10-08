@@ -8,13 +8,13 @@ import qs.Widgets
 NIconButton {
   id: root
 
-  property ShellScreen screen
   property real scaling: 1.0
 
   baseSize: Style.capsuleHeight
   compact: (Settings.data.bar.density === "compact")
   icon: "wallpaper-selector"
-  tooltipText: "Open wallpaper selector"
+  tooltipText: I18n.tr("tooltips.open-wallpaper-selector")
+  tooltipDirection: BarService.getTooltipDirection()
   colorBg: (Settings.data.bar.showCapsule ? Color.mSurfaceVariant : Color.transparent)
   colorFg: Color.mOnSurface
   colorBorder: Color.transparent
