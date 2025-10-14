@@ -43,6 +43,14 @@ Item {
     function clear() {
       NotificationService.clearHistory()
     }
+
+    function dismissOldest() {
+      NotificationService.dismissOldestActive()
+    }
+
+    function dismissAll() {
+      NotificationService.dismissAllActive()
+    }
   }
 
   IpcHandler {
@@ -112,10 +120,14 @@ Item {
     function muteOutput() {
       AudioService.setOutputMuted(!AudioService.muted)
     }
+    function increaseInput() {
+      AudioService.increaseInputVolume()
+    }
+    function decreaseInput() {
+      AudioService.decreaseInputVolume()
+    }
     function muteInput() {
-      if (AudioService.source?.ready && AudioService.source?.audio) {
-        AudioService.source.audio.muted = !AudioService.source.audio.muted
-      }
+      AudioService.setInputMuted(!AudioService.inputMuted)
     }
   }
 
@@ -123,6 +135,10 @@ Item {
     target: "sessionMenu"
     function toggle() {
       sessionMenuPanel.toggle()
+    }
+
+    function lockAndSuspend() {
+      CompositorService.lockAndSuspend()
     }
   }
 
