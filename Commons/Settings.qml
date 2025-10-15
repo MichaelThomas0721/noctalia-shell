@@ -272,6 +272,9 @@ Singleton {
           "id": "audio-card",
           "enabled": true
         }, {
+          "id": "weather-card",
+          "enabled": true
+        }, {
           "id": "media-sysmon-card",
           "enabled": true
         }]
@@ -385,6 +388,11 @@ Singleton {
       property bool enabled: false
       property string wallpaperChange: ""
       property string darkModeChange: ""
+    }
+
+    // battery
+    property JsonObject battery: JsonObject {
+      property int chargingMode: 0
     }
   }
 

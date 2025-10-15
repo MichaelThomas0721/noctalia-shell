@@ -5,7 +5,6 @@ import Quickshell
 import qs.Commons
 import qs.Services
 import qs.Widgets
-import qs.Modules.Settings.Extras
 
 ColumnLayout {
   id: root
@@ -23,13 +22,13 @@ ColumnLayout {
       "enabled": true,
       "required": false
     }, {
-      "id": "weather-card",
-      "text": "Weather",
+      "id": "audio-card",
+      "text": "Audio Sliders",
       "enabled": true,
       "required": false
     }, {
-      "id": "audio-card",
-      "text": "Audio Sliders",
+      "id": "weather-card",
+      "text": "Weather",
       "enabled": true,
       "required": false
     }, {
@@ -221,7 +220,7 @@ ColumnLayout {
       spacing: Style.marginM
 
       // Left
-      SectionEditor {
+      NSectionEditor {
         sectionName: I18n.tr("settings.control-center.shortcuts.sectionLeft")
         sectionId: "left"
         settingsDialogComponent: ""
@@ -240,7 +239,7 @@ ColumnLayout {
       }
 
       // Right
-      SectionEditor {
+      NSectionEditor {
         sectionName: I18n.tr("settings.control-center.shortcuts.sectionRight")
         sectionId: "right"
         settingsDialogComponent: ""

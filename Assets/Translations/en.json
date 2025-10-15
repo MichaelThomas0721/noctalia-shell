@@ -59,7 +59,6 @@
           }
         }
       }
-      
     },
     "audio": {
       "title": "Audio",
@@ -223,7 +222,7 @@
       "widgets": {
         "section": {
           "label": "Widgets positioning",
-          "description": "Drag and drop widgets to reorder them within each section, or use the add/remove buttons to manage widgets."
+          "description": "Drag and drop widgets to reorder them. Badges indicate usage: [L]eft, [C]enter, [R]ight."
         }
       },
       "monitors": {
@@ -722,29 +721,29 @@
       }
     },
     "control-center": {
-        "title": "Control Center",
+      "title": "Control Center",
+      "section": {
+        "label": "Appearance",
+        "description": "Configure the Control Center panel positioning and behavior."
+      },
+      "position": {
+        "label": "Position",
+        "description": "Choose where the Control Center panel appears when opened."
+      },
+      "cards": {
         "section": {
-          "label": "Appearance",
-          "description": "Configure the Control Center panel positioning and behavior."
-        },
-        "position": {
-          "label": "Position",
-          "description": "Choose where the Control Center panel appears when opened."
-        },
-        "cards": {
-          "section": {
-            "label": "Cards",
-            "description": "Customize which controls appear in the Control Center and in what order."
-          }
-        },
-        "shortcuts": {
-          "section": {
-            "label": "Shortcuts widgets",
-            "description": "Configure and manage the shortcuts widgets."
-          },
-          "sectionLeft": "Left",
-          "sectionRight": "Right"
+          "label": "Cards",
+          "description": "Customize which controls appear in the Control Center and in what order."
         }
+      },
+      "shortcuts": {
+        "section": {
+          "label": "Shortcuts widgets",
+          "description": "Configure and manage the shortcuts widgets."
+        },
+        "sectionLeft": "Left",
+        "sectionRight": "Right"
+      }
     },
     "user-interface": {
       "title": "User interface",
@@ -1091,6 +1090,10 @@
         "preview": "Preview"
       },
       "taskbar": {
+        "hide-mode": {
+          "label": "Hiding mode",
+          "description": "Controls how the widget behaves when there are no matching windows."
+        },
         "only-active-workspaces": {
           "label": "Only from active workspaces",
           "description": "Show only apps from active workspaces."
@@ -1376,20 +1379,13 @@
   },
   "session-menu": {
     "title": "Session Menu",
-    "click-again": "Click again to execute immediately",
     "action-in-seconds": "{action} in {seconds} seconds...",
     "lock": "Lock",
-    "lock-subtitle": "Lock your session",
     "lock-and-suspend": "Lock and Suspend",
-    "lock-and-suspend-subtitle": "Lock session and put system to sleep",
     "suspend": "Suspend",
-    "suspend-subtitle": "Put system to sleep",
     "reboot": "Reboot",
-    "reboot-subtitle": "Restart your computer",
     "logout": "Logout",
-    "logout-subtitle": "End your session",
-    "shutdown": "Shutdown",
-    "shutdown-subtitle": "Turn off your computer"
+    "shutdown": "Shutdown"
   },
   "plugins": {
     "applications": "Applications",
@@ -1574,6 +1570,19 @@
       "low": "Low battery",
       "low-desc": "Battery is at {percent}%. Please connect the charger."
     },
+    "battery-manager": {
+      "title": "Battery threshold",
+      "set-success-desc": "Battery threshold set to {percent}%",
+      "initial-setup": "Initial setup required",
+      "set-failed": "Failed to set battery threshold",
+      "install-success": "Installed successfully",
+      "install-missing": "Required files are missing",
+      "install-unsupported": "System is not supported",
+      "install-failed": "Installation failed",
+      "uninstall-setup": "Uninstalling, authentication required",
+      "uninstall-success": "Uninstalled successfully",
+      "uninstall-failed": "Uninstallation failed"
+    },
     "missing-control-center": {
       "label": "Last Control Center widget removed",
       "description": "The Control Center widget has been removed from the bar. To access it from the bar again, you will need to re-add the widget. You can open it with right clicking on the bar too."
@@ -1605,6 +1614,13 @@
     "charging-rate": "Charging rate: {rate} W.",
     "discharging-rate": "Discharging rate: {rate} W.",
     "charging": "Charging.",
-    "discharging": "Discharging."
+    "discharging": "Discharging.",
+    "panel": {
+      "title": "Charge threshold",
+      "full": "Full capacity ({percent}%)",
+      "balanced": "Balanced ({percent}%)",
+      "lifespan": "Extended lifespan ({percent}%)",
+      "disabled": "Battery manager disabled"
+    }
   }
 }
