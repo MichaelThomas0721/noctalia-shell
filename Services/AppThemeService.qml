@@ -81,14 +81,14 @@ Singleton {
   Connections {
     target: Settings.data.colorSchemes
     function onDarkModeChanged() {
-      Logger.log("AppThemeService", "Detected dark mode change")
+      Logger.i("AppThemeService", "Detected dark mode change")
       AppThemeService.generate()
     }
   }
 
   // --------------------------------------------------------------------------------
   function init() {
-    Logger.log("AppThemeService", "Service started")
+    Logger.i("AppThemeService", "Service started")
   }
 
   // --------------------------------------------------------------------------------
@@ -105,11 +105,11 @@ Singleton {
   // Wallpaper Colors Generation
   // --------------------------------------------------------------------------------
   function generateFromWallpaper() {
-    Logger.log("AppThemeService", "Generating from wallpaper on screen:", Screen.name)
 
+    // Logger.i("AppThemeService", "Generating from wallpaper on screen:", Screen.name)
     const wp = WallpaperService.getWallpaper(Screen.name).replace(/'/g, "'\\''")
     if (!wp) {
-      Logger.error("AppThemeService", "No wallpaper found")
+      Logger.e("AppThemeService", "No wallpaper found")
       return
     }
 
@@ -141,7 +141,7 @@ Singleton {
   //  Instead, we use 'sed' to apply a custom palette to the existing matugen templates.
   // --------------------------------------------------------------------------------
   function generateFromPredefinedScheme(schemeData) {
-    Logger.log("AppThemeService", "Generating templates from predefined color scheme")
+    Logger.i("AppThemeService", "Generating templates from predefined color scheme")
 
     handleTerminalThemes()
 
@@ -150,7 +150,10 @@ Singleton {
     const colors = schemeData[mode]
 
     const matugenColors = generatePalette(colors.mPrimary, colors.mSecondary, colors.mTertiary, colors.mError, colors.mSurface, isDarkMode)
-    const script = processAllTemplates(matugenColors, mode)
+    let script = processAllTemplates(matugenColors, mode)
+
+    // Add user templates if enabled
+    script += buildUserTemplateCommandForPredefined(schemeData, mode)
 
     generateProcess.command = ["bash", "-lc", script]
     generateProcess.running = true
@@ -335,8 +338,42 @@ Singleton {
     return script
   }
 
+  function buildUserTemplateCommandForPredefined(schemeData, mode) {
+    if (!Settings.data.templates.enableUserTemplates) {
+      return ""
+    }
+
+    const userConfigPath = getUserConfigPath()
+    const isDarkMode = Settings.data.colorSchemes.darkMode
+    const colors = schemeData[mode]
+
+    // Generate the matugen palette JSON
+    const matugenColors = generatePalette(colors.mPrimary, colors.mSecondary, colors.mTertiary, colors.mError, colors.mSurface, isDarkMode)
+
+    // Create a temporary JSON file with the color palette
+    const tempJsonPath = Settings.cacheDir + "predefined-colors.json"
+    const homeDir = Quickshell.env("HOME")
+    const tempJsonPathEsc = tempJsonPath.replace(/'/g, "'\\''")
+
+    let script = "\n# Execute user templates with predefined scheme colors\n"
+    script += `if [ -f '${userConfigPath}' ]; then\n`
+
+    // Write the color palette to a temp JSON file
+    script += `  cat > '${tempJsonPathEsc}' << 'EOF'\n`
+    script += JSON.stringify({
+                               "colors": matugenColors
+                             }, null, 2) + "\n"
+    script += "EOF\n"
+
+    // Use matugen json subcommand with the color palette
+    script += `  matugen json '${tempJsonPathEsc}' --config '${userConfigPath}' --mode ${mode}\n`
+    script += "fi"
+
+    return script
+  }
+
   function getUserConfigPath() {
-    return (Quickshell.env("HOME") + "/.config/matugen/config.toml").replace(/'/g, "'\\''")
+    return (Settings.configDir + "user-templates.toml").replace(/'/g, "'\\''")
   }
 
   // --------------------------------------------------------------------------------
@@ -349,7 +386,7 @@ Singleton {
     stderr: StdioCollector {
       onStreamFinished: {
         if (this.text) {
-          Logger.warn("AppThemeService", "GenerateProcess stderr:", this.text)
+          Logger.w("AppThemeService", "GenerateProcess stderr:", this.text)
         }
       }
     }
@@ -361,7 +398,7 @@ Singleton {
     stderr: StdioCollector {
       onStreamFinished: {
         if (this.text) {
-          Logger.warn("AppThemeService", "CopyProcess stderr:", this.text)
+          Logger.w("AppThemeService", "CopyProcess stderr:", this.text)
         }
       }
     }
